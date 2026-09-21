@@ -118,11 +118,6 @@ npm run build
 - [x] Persistent project completion reports with rich text and images
 - [ ] Custom backend migration (Node.js + Express + MySQL)
 
-
-## License
-
-Private - All rights reserved.
-
 ## Reports & Profile Media
 
 This build adds one database/storage migration for Reports and profile media:
