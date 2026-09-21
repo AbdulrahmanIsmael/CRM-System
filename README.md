@@ -4,7 +4,7 @@ A personal CRM system built for freelancers and independent professionals to man
 
 ## Vision
 
-Nexus CRM is the operational backbone of a freelance business — designed to transition from solo freelancer to managing a structured, professional service business. It handles client relationships, deal tracking, project management, communications, and business analytics in one place.
+Nexus CRM is the operational backbone of a freelance business - designed to transition from solo freelancer to managing a structured, professional service business. It handles client relationships, deal tracking, project management, communications, and business analytics in one place.
 
 ## Tech Stack
 
@@ -23,19 +23,19 @@ Nexus CRM is the operational backbone of a freelance business — designed to tr
 
 ## Core Features
 
-- **Dashboard** — live Supabase KPIs, revenue charts, pipeline, tasks, activity, projects, and upcoming events
-- **Contacts** — client/contact management, search, edit/delete, linked CRM data
-- **Deal Pipeline** — Kanban pipeline with customizable stages and edit/delete flows
-- **Projects** — project tracking, task-derived progress, linked invoices, and final reports
-- **Invoices** — fixed or itemized invoices, PDF layout customization, branded PDF export
-- **Reports** — persistent project completion reports with reorderable sections, rich text, section images, Arabic/English PDF output
-- **Tasks** — task management with priorities, links, edit/delete, and status updates
-- **Calendar** — events with create/edit/delete flows and linked CRM entities
-- **Analytics** — revenue, conversion, invoice, and productivity analytics
-- **Profile & Settings** — freelancer profile, business details, avatar/cover uploads, security settings, and deal-stage management
-- **Global Search** — cross-entity search for contacts, deals, projects, invoices, tasks, events, and communications
-- **i18n** — English + Arabic with RTL/LTR-aware layouts throughout the CRM
-- **Theme** — polished dark and light modes with Nexus design tokens
+- **Dashboard** - live Supabase KPIs, revenue charts, pipeline, tasks, activity, projects, and upcoming events
+- **Contacts** - client/contact management, search, edit/delete, linked CRM data
+- **Deal Pipeline** - Kanban pipeline with customizable stages and edit/delete flows
+- **Projects** - project tracking, task-derived progress, linked invoices, and final reports
+- **Invoices** - fixed or itemized invoices, PDF layout customization, branded PDF export
+- **Reports** - persistent project completion reports with reorderable sections, rich text, section images, Arabic/English PDF output
+- **Tasks** - task management with priorities, links, edit/delete, and status updates
+- **Calendar** - events with create/edit/delete flows and linked CRM entities
+- **Analytics** - revenue, conversion, invoice, and productivity analytics
+- **Profile & Settings** - freelancer profile, business details, avatar/cover uploads, security settings, and deal-stage management
+- **Global Search** - cross-entity search for contacts, deals, projects, invoices, tasks, events, and communications
+- **i18n** - English + Arabic with RTL/LTR-aware layouts throughout the CRM
+- **Theme** - polished dark and light modes with Nexus design tokens
 
 ## Project Structure
 
@@ -121,7 +121,7 @@ npm run build
 
 ## License
 
-Private — All rights reserved.
+Private - All rights reserved.
 
 ## Reports & Profile Media
 
