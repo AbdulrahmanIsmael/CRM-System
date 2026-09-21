@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 export type AppLocale = "en" | "ar";
 
-const DEFAULT_SITE_URL = "http://localhost:3000";
+const DEFAULT_SITE_URL = "https://crmsystem-three-orcin.vercel.app";
 
 export function getSiteUrl() {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
@@ -11,7 +11,10 @@ export function getSiteUrl() {
 }
 
 export function absoluteUrl(path = "/") {
-  return new URL(path.startsWith("/") ? path : `/${path}`, `${getSiteUrl()}/`).toString();
+  return new URL(
+    path.startsWith("/") ? path : `/${path}`,
+    `${getSiteUrl()}/`,
+  ).toString();
 }
 
 export async function buildPageMetadata({
@@ -54,7 +57,9 @@ export async function buildPageMetadata({
       canonical: canonicalUrl,
       languages: languageAlternates,
     },
-    keywords: t("keywords").split(",").map((item) => item.trim()),
+    keywords: t("keywords")
+      .split(",")
+      .map((item) => item.trim()),
     robots: noIndex
       ? {
           index: false,
