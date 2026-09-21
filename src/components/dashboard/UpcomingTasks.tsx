@@ -1,0 +1,8 @@
+import { Card,CardContent,CardHeader,CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Link } from "@/i18n/navigation";
+import { Clock3 } from "lucide-react";
+import { useLocale,useTranslations } from "next-intl";
+import { formatDateTime } from "@/lib/crm";
+export interface UpcomingTaskData{id:string;title:string;dueDate:Date|null;priority:string;linkedName:string|null}
+export function UpcomingTasks({tasks}:{tasks:UpcomingTaskData[]}){const t=useTranslations("Dashboard"),tk=useTranslations("Tasks"),tc=useTranslations("Common");const locale=useLocale() as "en"|"ar";return <Card className="h-full rounded-2xl"><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm">{t("upcomingTasks")}</CardTitle><Link href="/tasks" className="text-xs font-medium text-primary-light hover:text-primary">{tc("viewAll")}</Link></CardHeader><CardContent>{tasks.length===0?<div className="py-12 text-center text-sm text-muted-foreground">{t("noTasks")}</div>:<div className="space-y-2">{tasks.map(task=><div key={task.id} className="flex items-start gap-3 rounded-xl p-2 hover:bg-muted/40"><Checkbox checked={false} readOnly className="mt-0.5"/><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{task.title}</p><p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><Clock3 className="size-3"/>{task.dueDate?formatDateTime(task.dueDate,locale):tk("dueDate")}{task.linkedName&&<><span aria-hidden>•</span><span className="truncate">{task.linkedName}</span></>}</p></div></div>)}</div>}</CardContent></Card>}
