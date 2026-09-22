@@ -16,8 +16,8 @@ export function WebApplicationSchema({ locale }: { locale: AppLocale }) {
     inLanguage: locale,
     description:
       locale === "ar"
-        ? "نظام CRM لإدارة العملاء والصفقات والمشاريع والفواتير والمهام.":
-        "CRM software for managing contacts, deals, projects, invoices, tasks and business operations.",
+        ? "نظام CRM لإدارة العملاء والصفقات والمشاريع والفواتير والمهام."
+        : "CRM software for managing contacts, deals, projects, invoices, tasks and business operations.",
     image: absoluteUrl("/assets/images/og-image.png"),
     publisher: {
       "@type": "Organization",
@@ -26,7 +26,12 @@ export function WebApplicationSchema({ locale }: { locale: AppLocale }) {
     },
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialize(data) }} />;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: serialize(data) }}
+    />
+  );
 }
 
 export function PageSchema({
@@ -77,5 +82,10 @@ export function PageSchema({
     },
   ];
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialize(data) }} />;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: serialize(data) }}
+    />
+  );
 }

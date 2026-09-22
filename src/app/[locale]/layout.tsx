@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
+import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { Toaster } from "sonner";
@@ -66,33 +66,34 @@ export default async function LocaleLayout({
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (
-    <html lang={locale} dir={dir} suppressHydrationWarning className="">
-      <head>
-        <Script id="theme-init" strategy="beforeInteractive">
-          {`
-    (() => {
-      try {
-        const saved = localStorage.getItem("nexus-theme");
-        const dark = saved ? saved === "dark" : true;
+    <>
+      <Script id="theme-init" strategy="beforeInteractive" async>
+        {`
+          (() => {
+            try {
+              const saved = localStorage.getItem("nexus-theme");
+              const dark = saved ? saved === "dark" : true;
 
-        document.documentElement.classList.toggle("dark", dark);
-      } catch {}
-    })();
-  `}
-        </Script>
-      </head>
-      <body>
-        <NextIntlClientProvider messages={messages}>
-          <TooltipProvider>
-            <WebApplicationSchema locale={locale as AppLocale} />
-            {children}
-            <Toaster
-              position={dir === "rtl" ? "bottom-left" : "bottom-right"}
-              richColors
-            />
-          </TooltipProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+              document.documentElement.classList.toggle("dark", dark);
+            } catch {}
+          })();
+        `}
+      </Script>
+
+      <html lang={locale} dir={dir} suppressHydrationWarning className="">
+        <body>
+          <NextIntlClientProvider messages={messages}>
+            <TooltipProvider>
+              <WebApplicationSchema locale={locale as AppLocale} />
+              {children}
+              <Toaster
+                position={dir === "rtl" ? "bottom-left" : "bottom-right"}
+                richColors
+              />
+            </TooltipProvider>
+          </NextIntlClientProvider>
+        </body>
+      </html>
+    </>
   );
 }
