@@ -36,7 +36,7 @@ export default function LanguageSwitcher() {
             height={14}
             className="h-3.5 w-5 rounded-sm object-cover"
           />
-          Arabic
+          العربية
         </span>
       ) : (
         <span className="flex items-center gap-2">
