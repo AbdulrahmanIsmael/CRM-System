@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, UserRound, Building2, ReceiptText, KeyRound, Plus, Trash2, ImagePlus, BriefcaseBusiness } from "lucide-react";
+import { ShieldCheck, UserRound, Building2, ReceiptText, KeyRound, Plus, Trash2, ImagePlus, BriefcaseBusiness, AlertTriangle } from "lucide-react";
 
 type Stage={id:string;name:string;color:string;position:number;is_won:boolean;is_lost:boolean};
 type Profile={full_name:string;business_name:string;business_email:string;business_phone:string;business_address:string;business_logo_url:string;avatar_url:string;cover_image_url:string;default_currency:string;default_tax_rate:number;payment_terms:string;bank_details:string};
@@ -24,6 +25,10 @@ export function SettingsForm({profile,email,locale,stages}:{profile:Profile;emai
   const [password,setPassword]=useState({current:"",next:"",confirm:""});
   const [loading,setLoading]=useState(false);
   const [stageRows,setStageRows]=useState(stages);
+  const [deleteDialogOpen,setDeleteDialogOpen]=useState(false);
+  const [deleteConfirmation,setDeleteConfirmation]=useState("");
+  const [deletingAccount,setDeletingAccount]=useState(false);
+  const deleteConfirmationPhrase=t("deleteConfirmationPhrase");
   const update=(k:keyof Profile,v:string)=>setForm(x=>({...x,[k]:v}));
 
   const uploadProfileImage=async(kind:"avatar"|"cover"|"business-logo",file:File)=>{
@@ -61,6 +66,26 @@ export function SettingsForm({profile,email,locale,stages}:{profile:Profile;emai
   const addStage=async()=>{setLoading(true);try{const{data:auth}=await supabase.auth.getUser();if(!auth.user)throw new Error("UNAUTHORIZED");const nextPosition=stageRows.length?Math.max(...stageRows.map(s=>s.position))+1:0;const{data,error}=await supabase.from("deal_stages").insert({user_id:auth.user.id,name:t("newStage"),position:nextPosition,color:"#94A3B8",is_won:false,is_lost:false}).select("id,name,color,position,is_won,is_lost").single();if(error)throw error;if(data)setStageRows(x=>[...x,data as Stage]);toast.success(t("stageAdded"));}catch(err){console.error(err);toast.error(t("saveError"));}finally{setLoading(false);}};
   const removeStage=async(stage:Stage)=>{setLoading(true);try{const{error}=await supabase.from("deal_stages").delete().eq("id",stage.id);if(error){if(error.code==="23503")throw new Error("STAGE_IN_USE");throw error;}setStageRows(x=>x.filter(s=>s.id!==stage.id));toast.success(t("stageDeleted"));}catch(err){console.error(err);toast.error(err instanceof Error&&err.message==="STAGE_IN_USE"?t("stageInUse"):t("saveError"));}finally{setLoading(false);}};
 
+  const deleteAccount=async()=>{
+    if(deleteConfirmation!==deleteConfirmationPhrase){toast.error(t("deleteConfirmationError"));return;}
+    setDeletingAccount(true);
+    try{
+      const response=await fetch("/api/account/delete",{method:"POST",headers:{"Content-Type":"application/json"},cache:"no-store"});
+      const result=(await response.json().catch(()=>null)) as {error?:string}|null;
+      if(!response.ok)throw new Error(result?.error||"ACCOUNT_DELETE_FAILED");
+
+      await supabase.auth.signOut({scope:"local"});
+      setDeleteDialogOpen(false);
+      router.replace("/");
+      router.refresh();
+    }catch(error){
+      console.error(error);
+      toast.error(t("accountDeleteError"));
+    }finally{
+      setDeletingAccount(false);
+    }
+  };
+
   return <div className="space-y-5">
     <Card><CardHeader><CardTitle className="flex items-center gap-2"><UserRound className="size-4 text-primary-light"/>{t("profile")}</CardTitle></CardHeader><CardContent>
       <div className="mb-6 grid gap-4 md:grid-cols-3">
@@ -80,5 +105,40 @@ export function SettingsForm({profile,email,locale,stages}:{profile:Profile;emai
     <Card><CardHeader><CardTitle className="flex items-center gap-2"><ReceiptText className="size-4 text-primary-light"/>{t("dealPipeline")}</CardTitle></CardHeader><CardContent className="space-y-3"><div className="flex justify-end"><Button type="button" size="sm" variant="outline" onClick={addStage} disabled={loading}><Plus data-icon="inline-start"/>{t("addStage")}</Button></div>{stageRows.map(stage=><div key={stage.id} className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/15 p-4 sm:flex-row sm:items-center"><span className="size-3 rounded-full" style={{backgroundColor:stage.color}}/><Input value={stage.name} onChange={e=>setStageRows(x=>x.map(s=>s.id===stage.id?{...s,name:e.target.value}:s))} className="sm:flex-1"/><Input value={stage.color} onChange={e=>setStageRows(x=>x.map(s=>s.id===stage.id?{...s,color:e.target.value}:s))} className="sm:w-36"/><div className="flex items-center gap-2"><Badge variant={stage.is_won?"default":"secondary"}>{stage.is_won?t("won"):stage.is_lost?t("lost"):stage.position+1}</Badge><Button type="button" size="sm" variant="outline" onClick={()=>saveStage(stage)} disabled={loading}>{tc("save")}</Button><Button type="button" size="icon-sm" variant="ghost" className="text-danger hover:text-danger" onClick={()=>removeStage(stage)} aria-label={tc("delete")} disabled={loading}><Trash2/></Button></div></div>)}</CardContent></Card>
 
     <Card><CardHeader><CardTitle className="flex items-center gap-2"><KeyRound className="size-4 text-primary-light"/>{t("accountSecurity")}</CardTitle></CardHeader><CardContent className="space-y-6"><form onSubmit={updateEmail} className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end"><label className="space-y-2.5 text-sm"><span>{t("accountEmail")}</span><Input type="email" value={accountEmail} onChange={e=>setAccountEmail(e.target.value)}/></label><Button type="submit" variant="outline" disabled={loading||accountEmail===email}>{t("updateEmail")}</Button></form><div className="h-px bg-border"/><form onSubmit={updatePassword} className="space-y-4"><div className="grid gap-4 md:grid-cols-3"><label className="space-y-2.5 text-sm"><span>{t("currentPassword")}</span><Input type="password" value={password.current} onChange={e=>setPassword(x=>({...x,current:e.target.value}))}/></label><label className="space-y-2.5 text-sm"><span>{t("newPassword")}</span><Input type="password" value={password.next} onChange={e=>setPassword(x=>({...x,next:e.target.value}))}/></label><label className="space-y-2.5 text-sm"><span>{t("confirmNewPassword")}</span><Input type="password" value={password.confirm} onChange={e=>setPassword(x=>({...x,confirm:e.target.value}))}/></label></div><Button type="submit" disabled={loading||!password.next}>{t("updatePassword")}</Button></form><div className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-xs text-muted-foreground"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary-light"/><p>{t("securityNote")}</p></div></CardContent></Card>
+
+    <Card className="border-danger/30 bg-danger/5">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-danger"><AlertTriangle className="size-4"/>{t("dangerZone")}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="max-w-3xl text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">{t("deleteAccountTitle")}</p>
+          <p className="mt-1">{t("deleteAccountDescription")}</p>
+        </div>
+        <Button type="button" variant="destructive" onClick={()=>{setDeleteConfirmation("");setDeleteDialogOpen(true);}} disabled={loading||deletingAccount}>
+          <Trash2 data-icon="inline-start"/>{t("deleteAccountButton")}
+        </Button>
+      </CardContent>
+    </Card>
+
+    <Dialog open={deleteDialogOpen} onOpenChange={open=>{if(!deletingAccount)setDeleteDialogOpen(open);}}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-danger">{t("deleteAccountDialogTitle")}</DialogTitle>
+          <DialogDescription>{t("deleteAccountDialogDescription")}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2.5">
+          <label htmlFor="delete-account-confirmation" className="text-sm font-medium">{t("deleteConfirmationLabel")}</label>
+          <Input id="delete-account-confirmation" value={deleteConfirmation} onChange={e=>setDeleteConfirmation(e.target.value)} autoComplete="off" spellCheck={false} placeholder={deleteConfirmationPhrase} disabled={deletingAccount}/>
+          <p className="text-xs text-muted-foreground">{t("deleteConfirmationHint",{phrase:deleteConfirmationPhrase})}</p>
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={()=>setDeleteDialogOpen(false)} disabled={deletingAccount}>{tc("cancel")}</Button>
+          <Button type="button" variant="destructive" onClick={()=>void deleteAccount()} disabled={deletingAccount||deleteConfirmation!==deleteConfirmationPhrase}>
+            <Trash2 data-icon="inline-start"/>{deletingAccount?t("deletingAccount"):t("confirmDeleteAccount")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>;
 }

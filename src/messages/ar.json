@@ -546,7 +546,20 @@
     "uploadCover": "رفع غلاف",
     "imageTypes": "PNG أو JPG أو WebP حتى 5 ميجابايت",
     "theme": "المظهر",
-    "uploadBusinessLogo": "رفع الشعار"
+    "uploadBusinessLogo": "رفع الشعار",
+    "dangerZone": "منطقة الخطر",
+    "deleteAccountTitle": "حذف حسابك",
+    "deleteAccountDescription": "احذف حساب Nexus CRM وبيانات الـCRM والتقارير والملفات المرفوعة نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
+    "deleteAccountButton": "حذف الحساب",
+    "deleteAccountDialogTitle": "حذف الحساب نهائيًا؟",
+    "deleteAccountDialogDescription": "سيتم حذف حسابك وجهات الاتصال والصفقات والمشاريع والفواتير والمهام والأحداث والتقارير وبيانات الملف والملفات المرفوعة بشكل نهائي. سيتم تسجيل خروجك بعد الحذف.",
+    "deleteConfirmationLabel": "تأكيد الحذف",
+    "deleteConfirmationHint": "اكتب {phrase} حرفيًا للمتابعة.",
+    "deleteConfirmationError": "نص التأكيد غير مطابق.",
+    "accountDeleteError": "تعذر إكمال حذف الحساب. لم يتم حذف حسابك.",
+    "deletingAccount": "جارٍ حذف الحساب...",
+    "confirmDeleteAccount": "حذف نهائي",
+    "deleteConfirmationPhrase": "DELETE MY ACCOUNT"
   },
   "PDF": {
     "finalReport": "تقرير إتمام المشروع",

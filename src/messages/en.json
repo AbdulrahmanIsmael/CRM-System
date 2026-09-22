@@ -546,7 +546,20 @@
     "uploadCover": "Upload cover",
     "imageTypes": "PNG, JPG or WebP up to 5 MB",
     "theme": "Appearance",
-    "uploadBusinessLogo": "Upload logo"
+    "uploadBusinessLogo": "Upload logo",
+    "dangerZone": "Danger zone",
+    "deleteAccountTitle": "Delete your account",
+    "deleteAccountDescription": "Permanently delete your Nexus CRM account and all of its CRM data, reports, and uploaded files. This action cannot be undone.",
+    "deleteAccountButton": "Delete account",
+    "deleteAccountDialogTitle": "Delete account permanently?",
+    "deleteAccountDialogDescription": "This permanently removes your account, contacts, deals, projects, invoices, tasks, events, reports, profile data, and uploaded files. You will be signed out after deletion.",
+    "deleteConfirmationLabel": "Confirmation",
+    "deleteConfirmationHint": "Type {phrase} exactly to continue.",
+    "deleteConfirmationError": "The confirmation text does not match.",
+    "accountDeleteError": "Could not complete account deletion. Your account was not deleted.",
+    "deletingAccount": "Deleting account...",
+    "confirmDeleteAccount": "Delete permanently",
+    "deleteConfirmationPhrase": "DELETE MY ACCOUNT"
   },
   "PDF": {
     "finalReport": "Project Completion Report",

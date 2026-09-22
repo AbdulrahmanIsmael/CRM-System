@@ -39,3 +39,15 @@ It adds:
 - Row Level Security policies for the new tables and Storage objects
 
 Do not rerun the base schema just for these features. Existing CRM RLS remains unchanged.
+
+## Self-service account deletion
+
+No additional database migration is required for account deletion. The Settings Danger Zone uses the server-only Next.js route `/api/account/delete`, which removes the user-owned Storage objects and then calls Supabase Auth's admin delete API.
+
+Set this server-only environment variable in local and production environments:
+
+```env
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+Never expose or commit the service-role/secret key.

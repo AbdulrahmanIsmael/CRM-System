@@ -32,7 +32,7 @@ Nexus CRM is the operational backbone of a freelance business - designed to tran
 - **Tasks** - task management with priorities, links, edit/delete, and status updates
 - **Calendar** - events with create/edit/delete flows and linked CRM entities
 - **Analytics** - revenue, conversion, invoice, and productivity analytics
-- **Profile & Settings** - freelancer profile, business details, avatar/cover uploads, security settings, and deal-stage management
+- **Profile & Settings** - freelancer profile, business details, avatar/cover uploads, security settings, deal-stage management, and self-service account deletion
 - **Global Search** - cross-entity search for contacts, deals, projects, invoices, tasks, events, and communications
 - **i18n** - English + Arabic with RTL/LTR-aware layouts throughout the CRM
 - **Theme** - polished dark and light modes with Nexus design tokens
@@ -137,6 +137,8 @@ Run it once in **Supabase SQL Editor**. It adds:
 
 The migration expects the base schema/functions from `database_design.md` to already be installed. Normal CRM reads/writes continue to use the existing per-user RLS model.
 
+The Settings account-deletion flow is implemented server-side at `/api/account/delete`. It removes the user's Storage files and then uses Supabase Auth's admin delete API. Set the server-only `SUPABASE_SERVICE_ROLE_KEY` environment variable before enabling this flow.
+
 ### Development
 
 ```bash
@@ -147,6 +149,8 @@ npm run build
 ```
 
 Keep `.env.local` local to your environment and do not commit it.
+
+For the Settings account-deletion flow, also configure the server-only `SUPABASE_SERVICE_ROLE_KEY`. The key is used only by `/api/account/delete` and must never be exposed to browser code or committed to Git.
 
 ## SEO, metadata, schemas, and crawling
 

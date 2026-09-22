@@ -250,13 +250,25 @@ The repository keeps incremental migrations under:
 supabase/migrations/
 ```
 
-The current report/profile-assets migration is:
+The current application migration is:
 
 ```text
 supabase/migrations/20260921_reports_and_profile_assets.sql
 ```
 
 Use migrations when the database already exists and has application data. Use `supabase/setup.sql` as the consolidated bootstrap for a new environment.
+
+### Self-service account deletion
+
+The Settings **Danger zone** uses a server-only Next.js route at `/api/account/delete`. The route authenticates the current session with Supabase, removes the user's files from `profile-assets` and `report-assets`, and then calls Supabase Auth's admin user deletion with the server-only `SUPABASE_SERVICE_ROLE_KEY`. This key must never be exposed to the browser or committed to Git.
+
+Before using the feature, add this variable to the deployment environment (and to local `.env.local`):
+
+```env
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+The deletion endpoint is intentionally excluded from the internationalized middleware matcher, and the browser clears its local auth session after a successful response.
 
 ## 14. Quick setup checklist
 
