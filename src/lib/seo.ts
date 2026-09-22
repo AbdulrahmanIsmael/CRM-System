@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 export type AppLocale = "en" | "ar";
 
-const DEFAULT_SITE_URL = "https://crmsystem-three-orcin.vercel.app";
+const DEFAULT_SITE_URL = "https://crmsystem-brown.vercel.app";
 
 export function getSiteUrl() {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
