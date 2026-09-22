@@ -8,7 +8,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { buildPageMetadata, type AppLocale } from "@/lib/seo";
 import { WebApplicationSchema } from "@/components/seo/StructuredData";
 import "../globals.css";
-import Script from "next/script";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -66,34 +65,19 @@ export default async function LocaleLayout({
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (
-    <>
-      <Script id="theme-init" strategy="beforeInteractive" async>
-        {`
-          (() => {
-            try {
-              const saved = localStorage.getItem("nexus-theme");
-              const dark = saved ? saved === "dark" : true;
-
-              document.documentElement.classList.toggle("dark", dark);
-            } catch {}
-          })();
-        `}
-      </Script>
-
-      <html lang={locale} dir={dir} suppressHydrationWarning className="">
-        <body>
-          <NextIntlClientProvider messages={messages}>
-            <TooltipProvider>
-              <WebApplicationSchema locale={locale as AppLocale} />
-              {children}
-              <Toaster
-                position={dir === "rtl" ? "bottom-left" : "bottom-right"}
-                richColors
-              />
-            </TooltipProvider>
-          </NextIntlClientProvider>
-        </body>
-      </html>
-    </>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
+      <body>
+        <NextIntlClientProvider messages={messages}>
+          <TooltipProvider>
+            <WebApplicationSchema locale={locale as AppLocale} />
+            {children}
+            <Toaster
+              position={dir === "rtl" ? "bottom-left" : "bottom-right"}
+              richColors
+            />
+          </TooltipProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
 }

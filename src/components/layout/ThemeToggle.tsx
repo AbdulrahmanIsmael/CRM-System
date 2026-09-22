@@ -1,48 +1,53 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 
+const getTheme = () => {
+  if (typeof window === "undefined") {
+    return "dark";
+  }
+
+  return window.localStorage.getItem("nexus-theme") === "light"
+    ? "light"
+    : "dark";
+};
+
+const getServerTheme = () => "dark";
+
+const subscribe = (callback: () => void) => {
+  const handleChange = () => callback();
+
+  window.addEventListener("storage", handleChange);
+  window.addEventListener("nexus-theme-change", handleChange);
+
+  return () => {
+    window.removeEventListener("storage", handleChange);
+    window.removeEventListener("nexus-theme-change", handleChange);
+  };
+};
+
 export function ThemeToggle() {
   const t = useTranslations("Navigation");
+  const theme = useSyncExternalStore(subscribe, getTheme, getServerTheme);
 
-  const [dark, setDark] = useState(true);
-  const [mounted, setMounted] = useState(false);
+  const dark = theme === "dark";
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("nexus-theme");
-    const isDark = saved ? saved === "dark" : true;
-
-    document.documentElement.classList.toggle("dark", isDark);
-    setDark(isDark);
-    setMounted(true);
-  }, []);
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
 
   const toggle = () => {
-    setDark((current) => {
-      const next = !current;
+    const next = dark ? "light" : "dark";
 
-      document.documentElement.classList.toggle("dark", next);
-      window.localStorage.setItem("nexus-theme", next ? "dark" : "light");
+    window.localStorage.setItem("nexus-theme", next);
+    document.documentElement.classList.toggle("dark", next === "dark");
 
-      return next;
-    });
+    window.dispatchEvent(new Event("nexus-theme-change"));
   };
-
-  if (!mounted) {
-    return (
-      <Button
-        variant="ghost"
-        size="icon"
-        className="size-10 rounded-xl"
-        aria-hidden="true"
-        tabIndex={-1}
-      />
-    );
-  }
 
   return (
     <Button

@@ -48,11 +48,11 @@ export function AuthContainer() {
         </div>
       </div>
       {/* Forms Panel */}
-      <div className="w-full md:w-7/12 p-8 md:p-12 flex items-center justify-center relative bg-bg">
+      <div className="w-full md:w-7/12 p-4 sm:p-6 md:p-12 flex items-center justify-center relative bg-bg">
         {/* Subtle Backdrop Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-primary/5 via-bg to-bg blur-2xl pointer-events-none z-0" />
 
-        <div className="w-full relative z-10">
+        <div className="w-full max-w-xl relative z-10">
           <AnimatePresence mode="wait">
             {activeForm === "signin" && (
               <motion.div
