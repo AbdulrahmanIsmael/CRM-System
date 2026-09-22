@@ -1,165 +1,108 @@
 # Nexus CRM
 
-A personal CRM system built for freelancers and independent professionals to manage clients, track deal pipelines, and run their business operations from a single, unified dashboard.
+- Nexus CRM is a modern CRM system built for freelancers and independent professionals.
+- It helps manage clients, deals, projects, tasks, invoices, reports, communications, and business analytics from one dashboard.
+- The project is designed with a focus on real-world business workflows, clean UI, responsive design, and a scalable architecture.
 
-## Vision
+## Features
 
-Nexus CRM is the operational backbone of a freelance business - designed to transition from solo freelancer to managing a structured, professional service business. It handles client relationships, deal tracking, project management, communications, and business analytics in one place.
+- **Dashboard** — KPIs, revenue, pipeline, tasks, projects, activity, and upcoming events
+- **Contacts** — Manage clients and companies with search, tags, and linked CRM data
+- **Deals** — Kanban pipeline with customizable stages
+- **Projects** — Track projects, progress, tasks, invoices, and final reports
+- **Invoices** — Fixed or itemized invoices with branded PDF export
+- **Reports** — Rich-text project reports with reorderable sections and images
+- **Tasks & Calendar** — Manage tasks, events, priorities, and due dates
+- **Analytics** — Revenue, conversion, invoice, and productivity insights
+- **Global Search** — Search across contacts, deals, projects, invoices, tasks, events, and communications
+- **Profile & Settings** — Business information, profile images, theme, language, security, and account deletion
+- **Internationalization** — English and Arabic with full RTL/LTR support
+- **Dark & Light Mode** — Responsive theme system with Nexus design tokens
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| **Framework** | Next.js 16 (App Router) |
-| **Language** | TypeScript |
-| **Styling** | Tailwind CSS v4 |
-| **State Management** | Redux Toolkit |
-| **Server State** | TanStack Query |
-| **Backend (Current)** | Supabase (Auth, Database, Storage) |
-| **Backend (Planned)** | Node.js, Express, MySQL |
-| **i18n** | next-intl (Arabic + English) |
-| **Forms** | React Hook Form + Zod |
-| **Icons** | Lucide React |
-
-## Core Features
-
-- **Dashboard** - live Supabase KPIs, revenue charts, pipeline, tasks, activity, projects, and upcoming events
-- **Contacts** - client/contact management, search, edit/delete, linked CRM data
-- **Deal Pipeline** - Kanban pipeline with customizable stages and edit/delete flows
-- **Projects** - project tracking, task-derived progress, linked invoices, and final reports
-- **Invoices** - fixed or itemized invoices, PDF layout customization, branded PDF export
-- **Reports** - persistent project completion reports with reorderable sections, rich text, section images, Arabic/English PDF output
-- **Tasks** - task management with priorities, links, edit/delete, and status updates
-- **Calendar** - events with create/edit/delete flows and linked CRM entities
-- **Analytics** - revenue, conversion, invoice, and productivity analytics
-- **Profile & Settings** - freelancer profile, business details, avatar/cover uploads, security settings, deal-stage management, and self-service account deletion
-- **Global Search** - cross-entity search for contacts, deals, projects, invoices, tasks, events, and communications
-- **i18n** - English + Arabic with RTL/LTR-aware layouts throughout the CRM
-- **Theme** - polished dark and light modes with Nexus design tokens
-
-## Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router (pages & layouts)
-│   ├── (auth)/             # Auth pages (login, register)
-│   ├── (dashboard)/        # Dashboard layout group
-│   │   ├── dashboard/
-│   │   ├── contacts/
-│   │   ├── deals/
-│   │   ├── projects/
-│   │   ├── invoices/
-│   │   ├── tasks/
-│   │   ├── calendar/
-│   │   ├── analytics/
-│   │   └── settings/
-│   ├── layout.tsx
-│   ├── page.tsx
-│   └── globals.css
-├── components/             # Shared UI components
-│   ├── ui/                 # Base UI primitives (Button, Input, Modal, etc.)
-│   ├── layout/             # Layout components (Sidebar, Header, etc.)
-│   └── shared/             # Shared composite components
-├── lib/                    # Utilities, helpers, and configurations
-│   ├── supabase/           # Supabase client and helpers
-│   └── utils.ts
-├── store/                  # Redux Toolkit store and slices
-├── hooks/                  # Custom React hooks
-├── types/                  # TypeScript type definitions
-└── constants/              # App-wide constants and configuration
-```
-
-## Color System
-
-| Role | Hex |
-|---|---|
-| Primary | `#2F39A9` |
-| Primary Light | `#4B54C5` |
-| Secondary | `#2E6FA0` |
-| Accent | `#49A4BB` |
-| Success | `#15D8B3` |
-| Warning | `#F59E0B` |
-| Danger | `#EF4444` |
-| Background | `#0B0F1A` |
-| Surface | `#111827` |
-| Surface Light | `#1E2738` |
-| Text Primary | `#F1F5F9` |
-| Text Secondary | `#94A3B8` |
-| Border | `#1E293B` |
+- **Next.js 16** — App Router, Server Components, SSR
+- **TypeScript** — Type-safe application development
+- **Tailwind CSS v4** — UI styling
+- **Supabase** — Authentication, PostgreSQL database, and Storage
+- **next-intl** — Arabic and English localization
+- **React Hook Form + Zod** — Form handling and validation
+- **Recharts** — Data visualization
+- **Lucide React** — Icons
 
 ## Getting Started
 
+Install dependencies:
+
 ```bash
-# Install dependencies
 npm install
+````
 
-# Start development server
+Start the development server:
+
+```bash
 npm run dev
+```
 
-# Build for production
+Build for production:
+
+```bash
 npm run build
 ```
 
-## Roadmap / Current Status
+## Environment Variables
 
-- [x] Project setup (Next.js, Tailwind CSS, TypeScript)
-- [x] Authentication (Supabase Auth)
-- [x] Dashboard layout and navigation
-- [x] Contacts module
-- [x] Deal pipeline (Kanban board)
-- [x] Projects module
-- [x] Invoicing system + branded PDF export
-- [x] Task management
-- [x] Calendar with event CRUD
-- [x] Analytics dashboard
-- [x] Profile & settings
-- [x] Arabic / English + RTL / LTR
-- [x] Dark / light theme
-- [x] Persistent project completion reports with rich text and images
-- [ ] Custom backend migration (Node.js + Express + MySQL)
+Create a `.env.local` file in the project root:
 
-## Reports & Profile Media
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+SUPABASE_SERVICE_ROLE_KEY=your-server-side-secret
+```
 
-This build adds one database/storage migration for Reports and profile media:
+`SUPABASE_SERVICE_ROLE_KEY` is only used for server-side account deletion and must never be exposed to the client or committed to Git.
+
+## Supabase
+
+For a new Supabase project, run:
 
 ```text
-supabase/migrations/20260921_reports_and_profile_assets.sql
+supabase/setup.sql
 ```
 
-Run it once in **Supabase SQL Editor**. It adds:
+in the Supabase SQL Editor.
 
-- `profiles.cover_image_url`
-- `project_reports`
-- `report_sections`
-- `report_section_images`
-- `profile-assets` Storage bucket (public, image-only, user-folder write policies)
-- `report-assets` Storage bucket (private, image-only, user-folder RLS policies)
+For existing projects, use the versioned migrations inside:
 
-The migration expects the base schema/functions from `database_design.md` to already be installed. Normal CRM reads/writes continue to use the existing per-user RLS model.
-
-The Settings account-deletion flow is implemented server-side at `/api/account/delete`. It removes the user's Storage files and then uses Supabase Auth's admin delete API. Set the server-only `SUPABASE_SERVICE_ROLE_KEY` environment variable before enabling this flow.
-
-### Development
-
-```bash
-npm install
-npm run dev
-
-npm run build
+```text
+supabase/migrations/
 ```
 
-Keep `.env.local` local to your environment and do not commit it.
+The current setup includes:
 
-For the Settings account-deletion flow, also configure the server-only `SUPABASE_SERVICE_ROLE_KEY`. The key is used only by `/api/account/delete` and must never be exposed to browser code or committed to Git.
+- User profiles
+- Contacts and tags
+- Deals and pipeline stages
+- Projects
+- Invoices and invoice items
+- Tasks and calendar events
+- Activity and communication logs
+- Project reports
+- Profile and report image storage
+- Row Level Security (RLS)
+- User signup automation
 
-## SEO, metadata, schemas, and crawling
+More details are available in:
 
-The App Router uses localized `generateMetadata` for the English and Arabic routes, including canonical URLs, `hreflang` alternates, Open Graph/Twitter cards, robots directives, and page-specific descriptions. JSON-LD is included for the Nexus CRM web application plus `WebPage`/`BreadcrumbList` schemas. The application also provides `/robots.txt` and `/sitemap.xml`.
+```text
+supabase.md
+database_design.md
+system_overview.md
+```
 
-Nexus CRM is currently an authenticated/private application, so dashboard and authentication routes are intentionally marked `noindex` and the robots policy disallows crawling. The generated sitemap is intentionally empty until public marketing/docs pages exist.
+## Notes
 
-Set `NEXT_PUBLIC_SITE_URL` in `.env.local` to the real production origin (for example `https://crm.example.com`) so canonical, Open Graph, JSON-LD, and sitemap URLs use the deployed domain.
+Keep `.env.local` private and never commit secrets to GitHub.
 
-The project no longer depends on Google Fonts at build time; the UI uses local system font stacks so `next build` does not fail when the build environment cannot reach `fonts.googleapis.com`.
-
-Analytics data fetching was moved to a Server Component and only the Recharts visualization remains client-side.
+The application uses localized metadata, structured data, sitemap/robots configuration, accessible UI patterns, and Server Components where practical to improve SEO and performance.
