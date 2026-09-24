@@ -1,13 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
-import { LogOut, Menu, Settings2, UserRound, ChevronDown } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { getInitials } from "@/lib/crm";
-import { Button } from "@/components/ui/button";
+import { ChevronDown, LogOut, Menu, Settings2, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,12 +11,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useLocale, useTranslations } from "next-intl";
+
+import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "./GlobalSearch";
+import Image from "next/image";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { Sidebar } from "./Sidebar";
 import { ThemeToggle } from "./ThemeToggle";
+import { createClient } from "@/lib/supabase/client";
+import { getInitials } from "@/lib/crm";
+import { useRouter } from "@/i18n/navigation";
+import { useState } from "react";
 
-export function Header({ initialProfile }: { initialProfile: { name: string; email: string; avatar: string } }) {
+export function Header({
+  initialProfile,
+}: {
+  initialProfile: { name: string; email: string; avatar: string };
+}) {
   const locale = useLocale();
   const nav = useTranslations("Navigation");
   const router = useRouter();
@@ -40,7 +45,7 @@ export function Header({ initialProfile }: { initialProfile: { name: string; ema
   const initials = getInitials(profile.name);
 
   return (
-    <header className="sticky top-0 z-40 flex h-[68px] w-full min-w-0 shrink-0 items-center border-b border-border/80 bg-background/85 px-3 backdrop-blur-2xl sm:px-4 lg:px-6">
+    <header className="sticky top-0 z-40 flex h-17 w-full min-w-0 shrink-0 items-center border-b border-border/80 bg-background/85 px-3 backdrop-blur-2xl sm:px-4 lg:px-6">
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-2.5">
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger
@@ -57,7 +62,7 @@ export function Header({ initialProfile }: { initialProfile: { name: string; ema
           />
           <SheetContent
             side={locale === "ar" ? "right" : "left"}
-            className="w-[272px] border-e border-border bg-background p-0"
+            className="w-68 border-e border-border bg-background p-0"
           >
             <Sidebar className="w-full" />
           </SheetContent>
@@ -69,14 +74,17 @@ export function Header({ initialProfile }: { initialProfile: { name: string; ema
       <div className="ms-2 flex min-w-0 shrink-0 items-center gap-1 sm:gap-1.5">
         <ThemeToggle />
         <LanguageSwitcher />
-        <span className="mx-0.5 hidden h-7 w-px bg-border sm:block" aria-hidden />
+        <span
+          className="mx-0.5 hidden h-7 w-px bg-border sm:block"
+          aria-hidden
+        />
 
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
               <Button
                 variant="ghost"
-                className="h-10 w-10 gap-2 rounded-xl p-1.5 sm:w-auto sm:max-w-[15rem] sm:px-2 lg:px-2.5"
+                className="h-10 w-10 gap-2 rounded-xl p-1.5 sm:w-auto sm:max-w-60 sm:px-2 lg:px-2.5"
                 aria-label={nav("account")}
               >
                 <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-primary/30 bg-primary/10 text-xs font-semibold text-primary-light">
@@ -92,7 +100,7 @@ export function Header({ initialProfile }: { initialProfile: { name: string; ema
                     initials
                   )}
                 </span>
-                <span className="hidden min-w-0 flex-1 text-start sm:flex sm:flex-col sm:items-start lg:max-w-[10rem]">
+                <span className="hidden min-w-0 flex-1 text-start sm:flex sm:flex-col sm:items-start lg:max-w-40">
                   <span className="max-w-full truncate text-sm font-semibold text-foreground">
                     {profile.name || nav("profile")}
                   </span>

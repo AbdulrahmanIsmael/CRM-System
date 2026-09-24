@@ -57,6 +57,14 @@ type Profile = {
   bank_details: string;
 };
 
+function createUploadPath(
+  userId: string,
+  kind: "avatar" | "cover" | "business-logo",
+  ext: string,
+) {
+  return `${userId}/${kind}-${Date.now()}.${ext}`;
+}
+
 export function SettingsForm({
   profile,
   email,
@@ -104,7 +112,7 @@ export function SettingsForm({
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("UNAUTHORIZED");
       const ext = file.type.split("/")[1]?.replace("jpeg", "jpg") || "png";
-      const path = `${auth.user.id}/${kind}-${Date.now()}.${ext}`;
+      const path = createUploadPath(auth.user.id, kind, ext);
       const { error: uploadError } = await supabase.storage
         .from("profile-assets")
         .upload(path, file, {
@@ -367,7 +375,7 @@ export function SettingsForm({
                       className="size-full object-cover"
                     />
                   ) : (
-                    <div className="size-full bg-[radial-gradient(circle_at_20%_30%,rgb(75_84_197_/_0.45),transparent_35%),linear-gradient(135deg,rgb(47_57_169_/_0.18),rgb(73_164_187_/_0.08))]" />
+                    <div className="size-full bg-[radial-gradient(circle_at_20%_30%,rgb(75_84_197/0.45),transparent_35%),linear-gradient(135deg,rgb(47_57_169/0.18),rgb(73_164_187/0.08))]" />
                   )}
                 </div>
                 <div className="shrink-0">

@@ -1,6 +1,95 @@
-import { CircleDollarSign, FileText, FolderKanban, ListChecks, UsersRound } from "lucide-react";
+import {
+  CircleDollarSign,
+  FileText,
+  FolderKanban,
+  ListChecks,
+  UsersRound,
+} from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
+
 import { formatCurrency } from "@/lib/crm";
 
-type Props={totalRevenue:number;currency:string;activeProjects:number;totalClients:number;pendingInvoices:number;overdueTasks:number};
-export async function KPIGrid({totalRevenue,currency,activeProjects,totalClients,pendingInvoices,overdueTasks}:Props){const t=await getTranslations("Dashboard");const current=await getLocale();const items=[{label:t("totalRevenue"),value:formatCurrency(totalRevenue,currency,current as "en"|"ar"),meta:t("paidRevenue"),icon:CircleDollarSign,tone:"text-success bg-success/10"},{label:t("activeProjects"),value:activeProjects,meta:t("activeNow"),icon:FolderKanban,tone:"text-primary-light bg-primary/10"},{label:t("totalClients"),value:totalClients,meta:t("contactsCount"),icon:UsersRound,tone:"text-accent bg-accent/10"},{label:t("pendingInvoices"),value:pendingInvoices,meta:t("awaitingPayment"),icon:FileText,tone:"text-warning bg-warning/10"},{label:t("overdueTasks"),value:overdueTasks,meta:t("needAttention"),icon:ListChecks,tone:"text-danger bg-danger/10"}];return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">{items.map(({label,value,meta,icon:Icon,tone})=><div key={label} className="group rounded-2xl border border-border/80 bg-card/95 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_16px_36px_rgb(0_0_0_/_0.14)]"><div className="flex items-start gap-3"><div className={`rounded-2xl p-2.5 ${tone}`}><Icon className="size-5"/></div><div className="min-w-0"><p className="text-xs font-medium text-muted-foreground">{label}</p><p dir="ltr" className="mt-1 truncate text-2xl font-semibold tracking-tight text-end sm:text-[1.65rem]">{value}</p></div></div><p className="mt-4 text-xs text-muted-foreground">{meta}</p></div>)}</div>}
+type Props = {
+  totalRevenue: number;
+  currency: string;
+  activeProjects: number;
+  totalClients: number;
+  pendingInvoices: number;
+  overdueTasks: number;
+};
+export async function KPIGrid({
+  totalRevenue,
+  currency,
+  activeProjects,
+  totalClients,
+  pendingInvoices,
+  overdueTasks,
+}: Props) {
+  const t = await getTranslations("Dashboard");
+  const current = await getLocale();
+  const items = [
+    {
+      label: t("totalRevenue"),
+      value: formatCurrency(totalRevenue, currency, current as "en" | "ar"),
+      meta: t("paidRevenue"),
+      icon: CircleDollarSign,
+      tone: "text-success bg-success/10",
+    },
+    {
+      label: t("activeProjects"),
+      value: activeProjects,
+      meta: t("activeNow"),
+      icon: FolderKanban,
+      tone: "text-primary-light bg-primary/10",
+    },
+    {
+      label: t("totalClients"),
+      value: totalClients,
+      meta: t("contactsCount"),
+      icon: UsersRound,
+      tone: "text-accent bg-accent/10",
+    },
+    {
+      label: t("pendingInvoices"),
+      value: pendingInvoices,
+      meta: t("awaitingPayment"),
+      icon: FileText,
+      tone: "text-warning bg-warning/10",
+    },
+    {
+      label: t("overdueTasks"),
+      value: overdueTasks,
+      meta: t("needAttention"),
+      icon: ListChecks,
+      tone: "text-danger bg-danger/10",
+    },
+  ];
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      {items.map(({ label, value, meta, icon: Icon, tone }) => (
+        <div
+          key={label}
+          className="group rounded-2xl border border-border/80 bg-card/95 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_16px_36px_rgb(0_0_0/0.14)]"
+        >
+          <div className="flex items-start gap-3">
+            <div className={`rounded-2xl p-2.5 ${tone}`}>
+              <Icon className="size-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-muted-foreground">
+                {label}
+              </p>
+              <p
+                dir="ltr"
+                className="mt-1 truncate text-2xl font-semibold tracking-tight text-end sm:text-[1.65rem]"
+              >
+                {value}
+              </p>
+            </div>
+          </div>
+          <p className="mt-4 text-xs text-muted-foreground">{meta}</p>
+        </div>
+      ))}
+    </div>
+  );
+}

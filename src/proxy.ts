@@ -14,7 +14,8 @@ export async function proxy(request: NextRequest) {
   // 2. Set up Supabase client to refresh session and check auth
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!,
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!,
     {
       cookies: {
         getAll() {
@@ -28,7 +29,6 @@ export async function proxy(request: NextRequest) {
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options);
           });
-
         },
       },
     },
@@ -39,7 +39,7 @@ export async function proxy(request: NextRequest) {
   const hasUser = Boolean(claimsData?.claims?.sub);
 
   // 3. Handle auth redirects
-  // Determine if the current path is an auth path (sign-in, sign-up, confirm-email, etc)
+  // Public auth pages that authenticated users should be redirected away from
   const isAuthPage = routing.locales.some(
     (locale) =>
       pathname === `/${locale}/sign-in` ||
@@ -50,10 +50,23 @@ export async function proxy(request: NextRequest) {
       pathname === `/confirm-email`,
   );
 
+  // Password reset is special:
+  // Supabase creates an authenticated recovery session,
+  // so authenticated users MUST be allowed to access this page.
+  const isPasswordResetPage = routing.locales.some(
+    (locale) =>
+      pathname === `/${locale}/reset-password` ||
+      pathname === `/reset-password`,
+  );
+
+  // Authenticated users can access the password reset page
+  if (hasUser && isPasswordResetPage) {
+    return response;
+  }
+
   if (hasUser && isAuthPage) {
-    // If user is logged in and tries to access auth pages, redirect to dashboard
     const redirectUrl = new URL("/dashboard", request.url);
-    // Let next-intl handle the locale prefix for the redirect
+
     return handleI18nRouting(
       new NextRequest(redirectUrl, {
         headers: request.headers,
@@ -61,9 +74,14 @@ export async function proxy(request: NextRequest) {
     );
   }
 
-  if (!hasUser && !isAuthPage && !pathname.includes("/auth/callback")) {
-    // If user is NOT logged in and tries to access protected pages, redirect to sign-in
+  if (
+    !hasUser &&
+    !isAuthPage &&
+    !isPasswordResetPage &&
+    !pathname.includes("/auth/callback")
+  ) {
     const redirectUrl = new URL("/sign-in", request.url);
+
     return handleI18nRouting(
       new NextRequest(redirectUrl, {
         headers: request.headers,

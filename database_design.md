@@ -247,7 +247,7 @@ Extends Supabase `auth.users`. Auto-created on signup via trigger.
 | `id` | `uuid` | PK, DEFAULT `gen_random_uuid()` | |
 | `user_id` | `uuid` | NOT NULL, FK → profiles.id | Owner |
 | `contact_id` | `uuid` | NOT NULL, FK → contacts.id | Bill to |
-| `project_id` | `uuid` | FK → projects.id ON DELETE CASCADE, nullable | Linked project |
+| `project_id` | `uuid` | FK → projects.id ON DELETE SET NULL, nullable | Linked project |
 | `invoice_number` | `text` | NOT NULL | e.g., `INV-2026-001` |
 | `pricing_type` | `text` | NOT NULL, CHECK `('itemized','fixed')` | Billing model |
 | `fixed_amount` | `numeric(12,2)` | | Used when `pricing_type = 'fixed'` |

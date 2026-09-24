@@ -1,8 +1,3 @@
-import { getTranslations } from "next-intl/server";
-import { createClient } from "@/lib/supabase/server";
-import { Link } from "@/i18n/navigation";
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BriefcaseBusiness,
   Mail,
@@ -11,8 +6,14 @@ import {
   Settings2,
   WalletCards,
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import Image from "next/image";
+import { Link } from "@/i18n/navigation";
+import { buttonVariants } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/server";
 import { getInitials } from "@/lib/crm";
+import { getTranslations } from "next-intl/server";
 
 export default async function ProfilePage() {
   const t = await getTranslations("Settings");
@@ -50,7 +51,7 @@ export default async function ProfilePage() {
         </Link>
       </div>
       <Card className="overflow-hidden">
-        <div className="relative h-36 overflow-hidden bg-[radial-gradient(circle_at_20%_30%,rgb(75_84_197_/_0.45),transparent_35%),linear-gradient(135deg,rgb(47_57_169_/_0.18),rgb(73_164_187_/_0.08))]">
+        <div className="relative h-36 overflow-hidden bg-[radial-gradient(circle_at_20%_30%,rgb(75_84_197/0.45),transparent_35%),linear-gradient(135deg,rgb(47_57_169/0.18),rgb(73_164_187/0.08))]">
           {p?.cover_image_url ? (
             <Image
               src={p.cover_image_url}
