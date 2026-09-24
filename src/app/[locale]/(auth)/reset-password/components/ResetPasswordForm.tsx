@@ -7,12 +7,14 @@ import { useTranslations } from "next-intl";
 import { Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AuthInput } from "../../components/AuthInput";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { resetPasswordSchema, type ResetPasswordFormData } from "@/types/auth";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/navigation";
 
 export function ResetPasswordForm() {
   const t = useTranslations("Auth");
+  const tc = useTranslations("Common");
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
@@ -49,7 +51,8 @@ export function ResetPasswordForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 bg-surface rounded-2xl shadow-xl border border-border text-center relative z-10">
+    <div className="relative w-full max-w-md p-8 bg-surface rounded-2xl shadow-xl border border-border text-center z-10">
+      <LoadingOverlay show={isLoading} label={tc("loading")} />
       <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
         <Lock className="w-10 h-10 text-primary" />
       </div>

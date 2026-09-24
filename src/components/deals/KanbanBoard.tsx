@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CalendarDays, DollarSign } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/crm";
-import { DealEditDialog } from "@/components/forms/DealEditDialog";
+import { DealFormDialog } from "@/components/forms/DealFormDialog";
 import { DeleteEntityButton } from "@/components/actions/DeleteEntityButton";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 
 type Stage = { id: string; name: string; position: number; color: string | null; is_won: boolean; is_lost: boolean };
 type Deal = { id: string; title: string; value: number; currency: string; priority: string; expected_close_date: string | null; contactName: string; stageId: string; contact_id: string; notes: string | null };
@@ -34,6 +35,7 @@ export function KanbanBoard() {
   const [stages, setStages] = useState<Stage[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [moving, setMoving] = useState(false);
   const [contacts, setContacts] = useState<{ id: string; label: string }[]>([]);
 
   useEffect(() => {
@@ -82,6 +84,7 @@ export function KanbanBoard() {
     if (!nextStage || !previous) return;
 
     setDeals((current) => current.map((deal) => deal.id === id ? { ...deal, stageId: nextStage.id } : deal));
+    setMoving(true);
 
     const { error } = await supabase
       .from("deals")
@@ -95,6 +98,7 @@ export function KanbanBoard() {
     if (error) {
       setDeals((current) => current.map((deal) => deal.id === id ? previous : deal));
       toast.error(t("moveError"));
+      setMoving(false);
       return;
     }
 
@@ -111,6 +115,7 @@ export function KanbanBoard() {
     }
 
     toast.success(nextStage.is_won ? t("wonPrompt") : t("moved"));
+    setMoving(false);
   }
 
   if (loading) {
@@ -119,11 +124,13 @@ export function KanbanBoard() {
 
   return (
     <DragDropContext onDragEnd={move}>
-      <div className="flex h-[calc(100vh-12rem)] gap-4 overflow-x-auto pb-4">
+      <div className="relative">
+        <LoadingOverlay show={moving} label={tc("saving")} />
+      <div className="flex min-h-0 h-[calc(100vh-12rem)] gap-4 overflow-x-auto overflow-y-hidden pb-4">
         {stages.map((stage) => {
           const stageDeals = deals.filter((deal) => deal.stageId === stage.id);
           return (
-            <div key={stage.id} className="flex w-80 shrink-0 flex-col">
+            <div key={stage.id} className="flex min-h-0 w-80 shrink-0 flex-col overflow-hidden">
               <div className="mb-3 flex items-center justify-between rounded-xl border border-border/70 bg-surface/60 px-3 py-2">
                 <h3 className="flex items-center gap-2 font-semibold">
                   <div className="h-3 w-3 rounded-full" style={{ backgroundColor: stage.color || "#94A3B8" }} />
@@ -137,7 +144,7 @@ export function KanbanBoard() {
                   <div
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    className={`flex-1 rounded-2xl border border-border/80 p-2 transition-colors ${snapshot.isDraggingOver ? "bg-primary/5 border-primary/30" : "bg-card/70"}`}
+                    className={`min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-2xl border border-border/80 p-2 transition-colors ${snapshot.isDraggingOver ? "bg-primary/5 border-primary/30" : "bg-card/70"}`}
                   >
                     {stageDeals.map((deal, index) => (
                       <Draggable key={deal.id} draggableId={deal.id} index={index}>
@@ -156,7 +163,7 @@ export function KanbanBoard() {
                               </div>
                             </CardHeader>
                             <CardContent className="p-4 pt-1">
-                              <div className="mb-3 flex items-center justify-between gap-2"><p className="truncate text-xs text-muted-foreground">{deal.contactName || tc("unknown")}</p><div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100"><DealEditDialog deal={{...deal,contact_id:deal.contact_id,stage_id:deal.stageId}} contacts={contacts} stages={stages.map(s=>({id:s.id,label:s.name}))} compact/><DeleteEntityButton entity="deal" id={deal.id}/></div></div>
+                              <div className="mb-3 flex items-center justify-between gap-2"><p className="truncate text-xs text-muted-foreground">{deal.contactName || tc("unknown")}</p><div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100"><DealFormDialog deal={{...deal,contact_id:deal.contact_id,stage_id:deal.stageId}} contacts={contacts} stages={stages.map(s=>({id:s.id,label:s.name}))} compact/><DeleteEntityButton entity="deal" id={deal.id}/></div></div>
                               <div className="flex items-center justify-between text-xs text-muted-foreground">
                                 <span className="flex items-center font-medium text-primary">
                                   <DollarSign className="me-0.5 h-3 w-3" />
@@ -181,6 +188,7 @@ export function KanbanBoard() {
             </div>
           );
         })}
+      </div>
       </div>
     </DragDropContext>
   );

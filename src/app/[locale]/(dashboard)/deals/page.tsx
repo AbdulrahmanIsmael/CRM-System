@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { KanbanBoard } from "@/components/deals/KanbanBoard";
-import { DealCreateDialog } from "@/components/forms/DealCreateDialog";
+import { DealFormDialog } from "@/components/forms/DealFormDialog";
 
 export default async function DealsPage({ searchParams }: { searchParams?: Promise<{ action?: string }> }) {
   const params = (await searchParams) ?? {};
@@ -25,7 +25,7 @@ export default async function DealsPage({ searchParams }: { searchParams?: Promi
           <h1 className="text-3xl font-bold tracking-tight">{tNav("deals")}</h1>
           <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
         </div>
-        <DealCreateDialog contacts={contactOptions} stages={stageOptions} autoOpen={params.action === "new"} />
+        <DealFormDialog contacts={contactOptions} stages={stageOptions} autoOpen={params.action === "new"} />
       </div>
 
       <div className="min-h-0 flex-1">

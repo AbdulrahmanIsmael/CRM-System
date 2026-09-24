@@ -1,147 +1,77 @@
-# Nexus CRM — Supabase Setup
+# Nexus CRM - Supabase Setup
 
-This document contains everything a developer needs to connect a fresh Supabase project to Nexus CRM.
+This is the practical Supabase setup guide for Nexus CRM.
 
-## 1. Create the Supabase project
+## 1. Create a Supabase project
 
-Create a Supabase project from the Supabase Dashboard. The official Next.js quickstart uses a Supabase project, the SQL Editor for database setup, and environment variables for the project URL/key. citeturn560590search3turn560590search6
+Create a new Supabase project and enable Email authentication.
 
-## 2. Run the complete database setup
+Set the local/production application URLs used by the project.
 
-The complete database bootstrap is stored in:
+## 2. Fresh database setup
+
+Run this file once in **Supabase SQL Editor**:
 
 ```text
 supabase/setup.sql
 ```
 
-Open **SQL Editor** in Supabase, paste the entire contents of `supabase/setup.sql`, and run it once for a fresh project.
+It creates the CRM tables, RLS policies, timestamp triggers, signup trigger, Reports tables, and Storage configuration.
 
-The script creates or configures:
+## 3. Existing database
 
-- `profiles`
-- `contacts`
-- `tags`
-- `contact_tags`
-- `deal_stages`
-- `deals`
-- `projects`
-- `invoices`
-- `invoice_items`
-- `tasks`
-- `events`
-- `communication_log`
-- `activity_log`
-- `project_reports`
-- `report_sections`
-- `report_section_images`
-- `updated_at` triggers
-- signup automation for profiles and default deal stages
-- task/event cascade behavior for contact/project deletion
-- Supabase Storage buckets and Storage RLS policies
-
-The database uses PostgreSQL Row Level Security so records are scoped to the authenticated user. Supabase recommends enabling RLS on exposed tables and using policies to control which rows each authenticated user can access. citeturn560590search8turn560590search12
-
-> **Existing production database:** do not use the full bootstrap as your normal migration workflow. Use the versioned files under `supabase/migrations/` for incremental changes so existing data and schema history are preserved.
-
-## 3. Authentication configuration
-
-Nexus CRM uses Supabase Auth with email/password authentication.
-
-Configure the Email provider in Supabase Auth and set the application URL/redirect URLs for each environment you use.
-
-Typical local URL:
+For a database that already contains Nexus CRM data, use the incremental migrations instead of rerunning the full bootstrap:
 
 ```text
-http://localhost:3000
+supabase/migrations/20260921_reports_and_profile_assets.sql
+supabase/migrations/20260923_contact_enrichment.sql
 ```
 
-Typical production URL:
-
-```text
-https://your-real-domain.com
-```
-
-Keep local and production URLs aligned with the URLs used by the deployed application.
+The contact migration is additive and keeps the old `phone` column for compatibility.
 
 ## 4. Environment variables
 
-Copy `.env.example` to `.env.local` in the project root.
-
-The current Nexus CRM code expects:
+Create `.env.local`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+SUPABASE_SERVICE_ROLE_KEY=your-server-only-secret
 ```
 
-Supabase's current Next.js documentation also documents a publishable key variable for newer projects; this repository currently uses the `NEXT_PUBLIC_SUPABASE_ANON_KEY` variable, so keep the variable name expected by the application unless the code is intentionally migrated to another key name. citeturn560590search3turn560590search6
+Only the public URL/key belong in `NEXT_PUBLIC_*` variables.
 
-### Security
+`SUPABASE_SERVICE_ROLE_KEY` is server-only and is used for account deletion. Do not commit it or expose it to client-side code.
 
-Only public client-side Supabase values belong in `NEXT_PUBLIC_*` variables. Never commit a Supabase service-role/secret key to GitHub, browser code, or `.env.example`.
+## 5. Storage
 
-Service keys bypass RLS and must remain server-side and secret. citeturn560590search0turn560590search5
+Nexus CRM uses two buckets:
 
-## 5. Storage configuration
+| Bucket | Access | Limit | Purpose |
+|---|---|---:|---|
+| `profile-assets` | Public | 5 MB | Avatar, cover image, business logo |
+| `report-assets` | Private | 10 MB | Report section images |
 
-The SQL setup creates two buckets.
+Supported image types are PNG, JPEG/JPG, and WebP.
 
-| Bucket | Visibility | Limit | Types | Used for |
-|---|---|---:|---|---|
-| `profile-assets` | Public | 5 MB | PNG, JPEG, WebP | Avatar, cover image, business logo |
-| `report-assets` | Private | 10 MB | PNG, JPEG, WebP | Report section images |
+Objects are stored under a user UUID folder so Storage policies can enforce ownership.
 
-Supabase public buckets allow public reads of known asset URLs, while uploads/deletes/updates can still be restricted with Storage policies. Private buckets require authenticated access or signed URLs. citeturn560590search4
+## 6. Contacts
 
-### Storage path convention
+Contacts now support:
 
-The application scopes uploaded objects under the authenticated user's UUID as the first folder segment.
+- Nationality
+- Country code + phone number
+- Lead/source selection
 
-Example:
+The app keeps the legacy `phone` column for existing data. New records write the structured phone fields as well as the combined legacy value.
 
-```text
-<user-id>/avatar/....webp
-<user-id>/cover/....webp
-<user-id>/logo/....webp
-<user-id>/<report-id>/<section-id>/<uuid>.webp
-```
+Lead-source options include major freelance platforms and professional channels such as Khamsat, Mostaql, Upwork, Fiverr, Freelancer, PeoplePerHour, Guru, Toptal, Workana, Contra, 99designs, DesignCrowd, Dribbble, Malt, Worksome, LinkedIn, Behance, Facebook, Instagram, referrals, direct/outside-platform leads, and Other.
 
-The Storage policies enforce that first folder segment against `auth.uid()`. Supabase documents `storage.foldername(name)` as a helper for this type of per-user object policy. citeturn560590search0turn560590search11
+## 7. Reports
 
-Do not write directly to `storage.objects` for file uploads/deletes; use the Supabase Storage API from the application. Supabase treats the Storage schema as service metadata and recommends using the Storage API for file operations. citeturn560590search2
-
-## 6. Profile image uploads
-
-The profile/settings UI supports direct file selection from the user's device.
-
-Supported files:
-
-```text
-PNG
-JPEG / JPG
-WebP
-```
-
-Maximum size:
-
-```text
-5 MB per profile asset
-```
-
-Profile assets include:
-
-- Avatar
-- Cover image
-- Business logo
-
-The application uploads the file to Supabase Storage and stores the resulting public URL in `profiles.avatar_url`, `profiles.cover_image_url`, or `profiles.business_logo_url`.
-
-## 7. Reports and report images
-
-A project can have one client-facing report per user/project pair.
-
-Report data is stored in:
+Reports are stored in:
 
 ```text
 project_reports
@@ -149,138 +79,36 @@ report_sections
 report_section_images
 ```
 
-`report_sections.content_html` stores the rich-text HTML content. Section order is stored in `position`.
+Section content uses sanitized rich-text HTML. Report images use the private `report-assets` bucket and signed URLs.
 
-Report images are stored in the private `report-assets` bucket and referenced from `report_section_images.storage_path`. Optional accessibility text is stored in `alt_text`.
+## 8. Row Level Security
 
-## 8. Signup automation
+Business records are scoped to the authenticated user through `user_id = auth.uid()` policies.
 
-The SQL creates `public.handle_new_user()` and attaches it to the `auth.users` insert event.
+Child records also verify ownership through their parent resources where needed.
 
-When a user signs up, the trigger:
+## 9. Account deletion
 
-1. Creates their `public.profiles` row.
-2. Copies `full_name` from `raw_user_meta_data` when available.
-3. Creates the default deal stages:
-   - Lead
-   - Contacted
-   - Proposal Sent
-   - Negotiation
-   - Won
-   - Lost
+Settings → Danger Zone uses `/api/account/delete`.
 
-The function runs as `SECURITY DEFINER` and sets `search_path = public` to keep the function's object resolution controlled.
+The server removes the user's Storage files and then uses Supabase Auth's admin delete operation. The required secret is:
 
-## 9. Delete/cascade behavior
-
-The setup intentionally uses cascade behavior for the following relationships:
-
-- Delete a contact → linked `tasks` are deleted.
-- Delete a contact → linked `events` are deleted.
-- Delete a project → linked `tasks` are deleted.
-- Delete a project → linked `events` are deleted.
-- Delete a project → linked `project_reports` are deleted, which cascades to report sections and report image metadata.
-- Delete a report section → linked report image metadata is deleted.
-
-The application should still remove the corresponding Storage objects through the Storage API when report/profile assets are no longer referenced.
-
-## 10. Row Level Security model
-
-Nexus CRM is multi-account data scoped. Every primary business entity has a `user_id` and its RLS policy limits access to the authenticated user.
-
-Core pattern:
-
-```sql
-user_id = auth.uid()
+```env
+SUPABASE_SERVICE_ROLE_KEY=your-server-only-secret
 ```
 
-For child tables such as invoice items, contact tags, report sections, and report images, the policies also verify ownership through their parent row where required.
-
-Supabase documents RLS as the database-level authorization layer for exposed Postgres tables and Storage object policies as the equivalent access-control mechanism for files. citeturn560590search0turn560590search8
-
-## 11. Local development
-
-From the repository root:
+## 10. Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-The app should be available at:
-
-```text
-http://localhost:3000
-```
-
-For a production build:
+Production check:
 
 ```bash
 npm run build
 npm run start
 ```
 
-## 12. GitHub rules
-
-Commit these project configuration files:
-
-```text
-supabase/setup.sql
-supabase/migrations/*.sql
-supabase.md
-database_design.md
-system_overview.md
-.env.example
-```
-
-Do **not** commit:
-
-```text
-.env.local
-.env.*.local
-```
-
-The Supabase API URL and browser-safe public key can be represented through environment variables, but service-role/secret credentials must never be committed. citeturn560590search5
-
-## 13. Existing migrations
-
-The repository keeps incremental migrations under:
-
-```text
-supabase/migrations/
-```
-
-The current application migration is:
-
-```text
-supabase/migrations/20260921_reports_and_profile_assets.sql
-```
-
-Use migrations when the database already exists and has application data. Use `supabase/setup.sql` as the consolidated bootstrap for a new environment.
-
-### Self-service account deletion
-
-The Settings **Danger zone** uses a server-only Next.js route at `/api/account/delete`. The route authenticates the current session with Supabase, removes the user's files from `profile-assets` and `report-assets`, and then calls Supabase Auth's admin user deletion with the server-only `SUPABASE_SERVICE_ROLE_KEY`. This key must never be exposed to the browser or committed to Git.
-
-Before using the feature, add this variable to the deployment environment (and to local `.env.local`):
-
-```env
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-```
-
-The deletion endpoint is intentionally excluded from the internationalized middleware matcher, and the browser clears its local auth session after a successful response.
-
-## 14. Quick setup checklist
-
-```text
-[ ] Create Supabase project
-[ ] Configure Email Auth
-[ ] Run supabase/setup.sql on a fresh database
-[ ] Copy Supabase URL + key to .env.local
-[ ] Set NEXT_PUBLIC_SITE_URL
-[ ] Confirm profile-assets bucket exists
-[ ] Confirm report-assets bucket exists
-[ ] npm install
-[ ] npm run build
-[ ] npm run dev / npm run start
-```
+Keep `.env.local` private and never commit secrets.

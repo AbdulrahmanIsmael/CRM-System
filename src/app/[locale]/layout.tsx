@@ -4,6 +4,7 @@ import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { Toaster } from "sonner";
+import { cookies } from "next/headers";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { buildPageMetadata, type AppLocale } from "@/lib/seo";
 import { WebApplicationSchema } from "@/components/seo/StructuredData";
@@ -56,6 +57,10 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
+  const cookieStore = await cookies();
+  const theme = cookieStore.get("nexus-theme")?.value;
+  const isDark = theme === "dark";
+
   const { locale } = await params;
   if (!routing.locales.includes(locale as AppLocale)) {
     notFound();
@@ -65,7 +70,12 @@ export default async function LocaleLayout({
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (
-    <html lang={locale} dir={dir} suppressHydrationWarning>
+    <html
+      lang={locale}
+      dir={dir}
+      className={isDark ? "dark" : ""}
+      suppressHydrationWarning
+    >
       <body>
         <NextIntlClientProvider messages={messages}>
           <TooltipProvider>

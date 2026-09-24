@@ -17,23 +17,26 @@ export default function BrandLogo({
   alt = "Nexus CRM",
 }: BrandLogoProps) {
   return (
-    <span className={cn("relative block", className)}>
+    <span
+      className={cn("relative block shrink-0", className)}
+      style={{ width, height }}
+    >
       <Image
         src="/assets/images/logo.png"
         alt={alt}
-        width={width}
-        height={height}
+        fill
         priority={priority}
-        className="hidden h-auto w-full object-contain dark:block"
+        className="hidden object-contain dark:block"
+        sizes={`${width}px`}
       />
 
       <Image
         src="/assets/images/logo-light.png"
         alt={alt}
-        width={width}
-        height={height}
+        fill
         priority={priority}
-        className="block h-auto w-full object-contain dark:hidden"
+        className="block object-contain dark:hidden"
+        sizes={`${width}px`}
       />
     </span>
   );

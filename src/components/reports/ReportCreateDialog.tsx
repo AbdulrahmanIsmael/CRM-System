@@ -7,16 +7,39 @@ import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export function ReportCreateDialog({ projects, preselectedProjectId }: { projects: { id: string; label: string }[]; preselectedProjectId?: string }) {
+export function ReportCreateDialog({
+  projects,
+  preselectedProjectId,
+}: {
+  projects: { id: string; label: string }[];
+  preselectedProjectId?: string;
+}) {
   const t = useTranslations("Reports");
   const tc = useTranslations("Common");
   const router = useRouter();
   const supabase = createClient();
   const [open, setOpen] = useState(false);
-  const [projectId, setProjectId] = useState(preselectedProjectId ?? projects[0]?.id ?? "");
+  const [projectId, setProjectId] = useState(
+    preselectedProjectId ?? projects[0]?.id ?? "",
+  );
   const [loading, setLoading] = useState(false);
 
   async function createReport(event: React.FormEvent) {
@@ -28,17 +51,30 @@ export function ReportCreateDialog({ projects, preselectedProjectId }: { project
       if (!auth.user) throw new Error("UNAUTHORIZED");
       const project = projects.find((item) => item.id === projectId);
       if (!project) throw new Error("PROJECT_NOT_FOUND");
-      const { data, error } = await supabase.from("project_reports").insert({
-        user_id: auth.user.id,
-        project_id: project.id,
-        title: `${t("defaultTitle")} — ${project.label}`,
-      }).select("id").single();
+      const { data, error } = await supabase
+        .from("project_reports")
+        .insert({
+          user_id: auth.user.id,
+          project_id: project.id,
+          title: `${t("defaultTitle")} - ${project.label}`,
+        })
+        .select("id")
+        .single();
       if (error) {
         if (error.code === "23505") throw new Error("REPORT_EXISTS");
         throw error;
       }
       const firstSectionId = crypto.randomUUID();
-      const { error: sectionError } = await supabase.from("report_sections").insert({ id: firstSectionId, report_id: data.id, user_id: auth.user.id, title: t("defaultSection"), content_html: "", position: 0 });
+      const { error: sectionError } = await supabase
+        .from("report_sections")
+        .insert({
+          id: firstSectionId,
+          report_id: data.id,
+          user_id: auth.user.id,
+          title: t("defaultSection"),
+          content_html: "",
+          position: 0,
+        });
       if (sectionError) {
         await supabase.from("project_reports").delete().eq("id", data.id);
         throw sectionError;
@@ -49,19 +85,67 @@ export function ReportCreateDialog({ projects, preselectedProjectId }: { project
       router.refresh();
     } catch (error) {
       console.error(error);
-      toast.error(error instanceof Error && error.message === "REPORT_EXISTS" ? t("alreadyExists") : t("createError"));
-    } finally { setLoading(false); }
+      toast.error(
+        error instanceof Error && error.message === "REPORT_EXISTS"
+          ? t("alreadyExists")
+          : t("createError"),
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button size="lg"><Plus data-icon="inline-start" />{t("createReport")}</Button>} />
+      <DialogTrigger
+        render={
+          <Button size="lg">
+            <Plus data-icon="inline-start" />
+            {t("createReport")}
+          </Button>
+        }
+      />
       <DialogContent className="sm:max-w-xl">
-        <DialogHeader><DialogTitle>{t("createReport")}</DialogTitle><DialogDescription>{t("createDescription")}</DialogDescription></DialogHeader>
-        <form onSubmit={createReport} className="space-y-5">
-          <label className="space-y-2.5 text-sm"><span>{t("selectProject")}</span><Select value={projectId} items={projects.map((item) => ({ value: item.id, label: item.label }))} onValueChange={(value) => setProjectId(String(value))}><SelectTrigger className="w-full"><SelectValue placeholder={t("selectProject")} /></SelectTrigger><SelectContent>{projects.map((item) => <SelectItem key={item.id} value={item.id}>{item.label}</SelectItem>)}</SelectContent></Select></label>
-          <DialogFooter><Button type="button" variant="outline" onClick={() => setOpen(false)}>{tc("cancel")}</Button><Button type="submit" disabled={loading || !projectId}>{loading ? tc("saving") : tc("create")}</Button></DialogFooter>
-        </form>
+        <DialogHeader>
+          <DialogTitle>{t("createReport")}</DialogTitle>
+          <DialogDescription>{t("createDescription")}</DialogDescription>
+        </DialogHeader>
+        <div className="relative"><LoadingOverlay show={loading} label={tc("saving")} /><form onSubmit={createReport} className="space-y-5">
+          <label className="space-y-2.5 text-sm">
+            <span>{t("selectProject")}</span>
+            <Select
+              value={projectId}
+              items={projects.map((item) => ({
+                value: item.id,
+                label: item.label,
+              }))}
+              onValueChange={(value) => setProjectId(String(value))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("selectProject")} />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </label>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              {tc("cancel")}
+            </Button>
+            <Button type="submit" disabled={loading || !projectId}>
+              {loading ? tc("saving") : tc("create")}
+            </Button>
+          </DialogFooter>
+        </form></div>
       </DialogContent>
     </Dialog>
   );

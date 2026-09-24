@@ -1,53 +1,65 @@
-# Supabase Setup / Migration Guide
+# Supabase Setup / Migrations
 
 ## Fresh Supabase project
 
-Use the consolidated bootstrap script:
+Run the complete bootstrap once:
 
 ```text
 supabase/setup.sql
 ```
 
-Run the whole file once in the Supabase SQL Editor.
+Use the Supabase SQL Editor. It creates the current Nexus CRM schema, RLS policies, signup automation, report tables, and Storage buckets.
 
 ## Existing database
 
-Do not rerun the full bootstrap against a production database as a normal migration workflow. Apply the versioned migration(s) under `supabase/migrations/` for incremental changes.
+Do **not** rerun the full bootstrap as a normal production migration. Apply the versioned migrations in `supabase/migrations/` instead.
 
-Current incremental migration:
+Current incremental migrations:
 
 ```text
 supabase/migrations/20260921_reports_and_profile_assets.sql
+supabase/migrations/20260923_contact_enrichment.sql
 ```
 
-For the complete developer setup, see [`supabase.md`](./supabase.md).
+### `20260921_reports_and_profile_assets.sql`
 
-# Supabase migration required
-
-After the base Nexus CRM schema is installed, run the following file once in Supabase SQL Editor:
-
-`supabase/migrations/20260921_reports_and_profile_assets.sql`
-
-It adds:
+Adds Reports and profile media support:
 
 - `profiles.cover_image_url`
 - `project_reports`
 - `report_sections`
 - `report_section_images`
-- `profile-assets` Storage bucket (public, image-only)
-- `report-assets` Storage bucket (private, image-only)
-- Row Level Security policies for the new tables and Storage objects
+- `profile-assets` bucket
+- `report-assets` bucket
+- RLS/Storage policies for the new resources
 
-Do not rerun the base schema just for these features. Existing CRM RLS remains unchanged.
+### `20260923_contact_enrichment.sql`
 
-## Self-service account deletion
+Adds the new contact fields without removing the existing `phone` column:
 
-No additional database migration is required for account deletion. The Settings Danger Zone uses the server-only Next.js route `/api/account/delete`, which removes the user-owned Storage objects and then calls Supabase Auth's admin delete API.
+- `phone_country_code`
+- `phone_number`
+- `nationality`
+- `lead_source`
 
-Set this server-only environment variable in local and production environments:
+It also adds an index for filtering contacts by lead source.
 
-```env
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+Existing contact data is preserved. Legacy `phone` values remain available and are still used as a fallback when displaying old records.
+
+## Account deletion
+
+The Settings Danger Zone uses the server-side route:
+
+```text
+/api/account/delete
 ```
 
-Never expose or commit the service-role/secret key.
+It removes user-owned profile/report files and then deletes the authenticated Supabase user.
+
+Configure the server-only secret:
+
+```env
+SUPABASE_SERVICE_ROLE_KEY=your-server-only-secret
+```
+
+Never expose this key in client components, `NEXT_PUBLIC_*` variables, or Git.

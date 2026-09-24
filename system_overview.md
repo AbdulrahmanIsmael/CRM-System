@@ -1,4 +1,4 @@
-# Nexus CRM — Full System Overview
+# Nexus CRM - Full System Overview
 
 ## What Is Nexus CRM?
 
@@ -11,7 +11,7 @@ Nexus CRM is your personal business operating system. It's the single place wher
 - **Plan your day** with tasks and calendar
 - **See the health** of your business at a glance
 
-It's designed for **multi-user access** — anyone can sign up and get their own isolated CRM workspace.
+It's designed for **multi-user access** - anyone can sign up and get their own isolated CRM workspace.
 
 ---
 
@@ -21,7 +21,7 @@ It's designed for **multi-user access** — anyone can sign up and get their own
 
 - New users register with email + password (Supabase Auth)
 - After login, users land on their **Dashboard**
-- Each user has their own isolated data — no cross-user visibility
+- Each user has their own isolated data - no cross-user visibility
 
 ### 2. Dashboard (Home)
 
@@ -30,7 +30,7 @@ The first thing you see after login. It answers: *"How's my business doing right
 | Widget | What It Shows |
 |---|---|
 | **Revenue Summary** | Total revenue this month/quarter/year, compared to previous period |
-| **Pipeline Overview** | Mini funnel — how many deals in each stage |
+| **Pipeline Overview** | Mini funnel - how many deals in each stage |
 | **Recent Activity** | Last 10 actions (new contact added, deal moved, invoice sent) |
 | **Upcoming Tasks** | Tasks due today and this week |
 | **Quick Stats Cards** | Total clients, active deals, pending invoices, overdue tasks |
@@ -39,10 +39,10 @@ The first thing you see after login. It answers: *"How's my business doing right
 The heart of the CRM. Every person you interact with lives here.
 
 **Contact Profile includes:**
-- Full name, email, phone, company, location, timezone
-- Contact type: **Client**, **Lead**, **Partner**, **Other**
+- Full name, email, structured phone (country code + number), nationality, company, location, timezone, and lead source
+- Contact type: **Person** or **Company**
 - **Status**: Active, Inactive, Archived
-- **Notes**: Free-form notes about the person
+- **Notes**: Rich-text notes using the shared report editor and safe HTML rendering
 - **Tags**: Custom labels (e.g., "WordPress", "React", "High Value")
 - **Communication History**: Log of emails, calls, meetings (manual entries)
 - **Linked Deals**: All deals associated with this contact
@@ -80,7 +80,7 @@ Lead → Contacted → Proposal Sent → Negotiation → Won → Lost
 Track active work tied to won deals.
 
 **Project includes:**
-- Project name, description
+- Project name, rich-text description
 - Linked contact and deal
 - Status: **Not Started**, **In Progress**, **On Hold**, **Completed**, **Cancelled**
 - Start date, deadline
@@ -91,7 +91,7 @@ Track active work tied to won deals.
 - Overview with key info
 - Task checklist (sub-tasks specific to this project)
 - Linked invoices
-- Notes and files
+- Rich-text notes/descriptions and files
 - Client-facing final report can be created from the project/report workflow
 
 ### 6. Invoices Module ⭐
@@ -110,7 +110,7 @@ For projects billed by deliverables/milestones:
 | 3 | Checkout Flow | Cart, checkout, payment integration | $400 |
 | | | **Total** | **$1,250** |
 
-Each line item is a "point" with its own price — exactly like Upwork's milestone system.
+Each line item is a "point" with its own price - exactly like Upwork's milestone system.
 
 #### Pricing Model B: Fixed Price
 
@@ -140,7 +140,7 @@ For projects with a single agreed price:
 - From a **Project Detail** → "Create Invoice" (auto-fills contact + project)
 
 **Invoice Actions:**
-- **Export as PDF** — clean, branded invoice ready to send to clients
+- **Export as PDF** - clean, branded invoice ready to send to clients
 - Mark as Sent / Paid / Overdue
 - Duplicate (for recurring similar invoices)
 
@@ -156,8 +156,8 @@ Personal task management for your daily work.
 - Tags
 
 **Views:**
-- **List view** — sortable, filterable table
-- **Board view** — Kanban (To Do → In Progress → Done)
+- **List view** - sortable, filterable table
+- **Board view** - Kanban (To Do → In Progress → Done)
 
 ### 8. Calendar
 Visual time-based planning.
@@ -174,13 +174,13 @@ Visual time-based planning.
 Business intelligence dashboard.
 
 **Charts & Metrics:**
-- **Revenue over time** — line/bar chart (monthly, quarterly)
-- **Deal conversion funnel** — how many deals move through each stage
-- **Win/Loss ratio** — percentage of deals won vs lost
-- **Revenue by contact** — who are your top clients
-- **Invoice status breakdown** — paid vs pending vs overdue
-- **Average deal size** — trend over time
-- **Tasks completion rate** — productivity metric
+- **Revenue over time** - line/bar chart (monthly, quarterly)
+- **Deal conversion funnel** - how many deals move through each stage
+- **Win/Loss ratio** - percentage of deals won vs lost
+- **Revenue by contact** - who are your top clients
+- **Invoice status breakdown** - paid vs pending vs overdue
+- **Average deal size** - trend over time
+- **Tasks completion rate** - productivity metric
 
 
 ### 10. Reports
@@ -195,7 +195,7 @@ Final project completion reports for clients. A report is linked to one project 
 
 - Report title
 - Project/client context
-- Multiple editable sections
+- Multiple editable sections with add, reorder, edit, and delete controls
 - Rich text formatting (bold, italic, bullets, numbered lists)
 - Optional section images
 - Arabic RTL / English LTR PDF output
@@ -223,8 +223,8 @@ Incremental changes remain under `supabase/migrations/`. The current reports/pro
 
 Supabase Storage currently contains two buckets:
 
-- `profile-assets` — public, image-only, 5 MB limit for avatar, cover, and business logo uploads.
-- `report-assets` — private, image-only, 10 MB limit for report section images.
+- `profile-assets` - public, image-only, 5 MB limit for avatar, cover, and business logo uploads.
+- `report-assets` - private, image-only, 10 MB limit for report section images.
 
 Uploaded objects are scoped by the authenticated user's UUID in the first folder segment, and Storage policies enforce this ownership model.
 
@@ -254,13 +254,15 @@ Because the CRM dashboard contains private, authenticated user data, dashboard r
 
 ### Accessibility & performance
 
-Current implementation standards include semantic headings/landmarks, accessible labels for interactive controls, meaningful image `alt` text, keyboard-visible focus states, `next/image` for optimized images, and reduced client-side work for data fetching. The production build no longer depends on fetching Geist fonts from Google during `next build`; the UI uses a local/system font stack.
+Current implementation standards include semantic headings/landmarks, accessible labels for interactive controls, meaningful image `alt` text, keyboard-visible focus states, `next/image` for optimized images, route-level loading UI, operation overlays, debounced list search, and reduced client-side work for data fetching. The production build no longer depends on fetching Geist fonts from Google during `next build`; the UI uses a local/system font stack.
+
+List-page search is client-driven with a short debounce, while the actual filtering query still runs in Server Components. Language navigation uses React transitions so route changes do not require a full browser reload.
 
 ### Storage
 
 Supabase Storage is used for profile avatar/cover/logo uploads and report section images. The profile bucket is public; the report-assets bucket is private with user-scoped Storage policies.
 
-## How You'd Use It — A Typical Day
+## How You'd Use It - A Typical Day
 
 ```
 Morning:
@@ -270,7 +272,7 @@ Morning:
 
 Working on leads:
   4. Go to Contacts → Add a new lead from yesterday's inquiry
-  5. Create a deal for them: "Mobile App Development — $5,000"
+  5. Create a deal for them: "Mobile App Development - $5,000"
   6. Drag deal to "Contacted" stage
 
 After sending proposal:
@@ -344,7 +346,7 @@ erDiagram
 ```
 
 > [!NOTE]
-> Every entity is scoped to a **USER** — complete data isolation between accounts. Supabase Row Level Security (RLS) will enforce this at the database level.
+> Every entity is scoped to a **USER** - complete data isolation between accounts. Supabase Row Level Security (RLS) will enforce this at the database level.
 
 ---
 

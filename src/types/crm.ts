@@ -28,6 +28,10 @@ export interface ContactRecord {
   company_id: string | null;
   email: string | null;
   phone: string | null;
+  phone_country_code?: string | null;
+  phone_number?: string | null;
+  nationality?: string | null;
+  lead_source?: string | null;
   website: string | null;
   industry: string | null;
   location: string | null;

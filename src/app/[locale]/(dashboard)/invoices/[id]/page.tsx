@@ -1,12 +1,138 @@
-import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 import { ArrowLeft } from "lucide-react";
+import { DeleteEntityButton } from "@/components/actions/DeleteEntityButton";
+import { InvoiceFormDialog } from "@/components/forms/InvoiceFormDialog";
+import { InvoiceStatusActions } from "@/components/forms/InvoiceStatusActions";
 import { Link } from "@/i18n/navigation";
 import { PrintableInvoice } from "@/components/invoices/PrintableInvoice";
-import { InvoiceEditDialog } from "@/components/forms/InvoiceEditDialog";
-import { DeleteEntityButton } from "@/components/actions/DeleteEntityButton";
-import { InvoiceStatusActions } from "@/components/forms/InvoiceStatusActions";
-import { Button,buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { getContactDisplayName } from "@/lib/crm";
-export default async function InvoiceDetailsPage({params}:{params:Promise<{id:string}>}){const{id}=await params;const t=await getTranslations("Invoices"),tc=await getTranslations("Common");const supabase=await createClient();const[{data:invoice},{data:items},{data:profile},{data:contacts},{data:projects}]=await Promise.all([supabase.from("invoices").select("id,invoice_number,contact_id,project_id,pricing_type,fixed_amount,subtotal,tax_rate,tax_amount,discount,total,currency,status,issue_date,due_date,notes,contacts(type,first_name,last_name,company_name,email)").eq("id",id).maybeSingle(),supabase.from("invoice_items").select("id,description,amount,position").eq("invoice_id",id).order("position"),supabase.from("profiles").select("full_name,business_name,business_email,business_phone,business_address,business_logo_url,payment_terms,bank_details").maybeSingle(),supabase.from("contacts").select("id,type,first_name,last_name,company_name").eq("status","active"),supabase.from("projects").select("id,name").order("created_at",{ascending:false})]);if(!invoice)notFound();const contact=(Array.isArray(invoice.contacts)?invoice.contacts[0]:invoice.contacts)||{};const printable={id:invoice.id,number:invoice.invoice_number,clientName:getContactDisplayName(contact)||"",clientEmail:contact.email||"",issueDate:invoice.issue_date,dueDate:invoice.due_date,status:invoice.status,type:invoice.pricing_type,notes:invoice.notes||profile?.payment_terms||profile?.bank_details||"",items:(items??[]).map(item=>({description:item.description,amount:Number(item.amount||0)})),subtotal:Number(invoice.subtotal||0),taxRate:Number(invoice.tax_rate||0),taxAmount:Number(invoice.tax_amount||0),discount:Number(invoice.discount||0),total:Number(invoice.total||0),currency:invoice.currency||"USD",business:{name:profile?.business_name?.trim()||profile?.full_name?.trim()||"Account owner",email:profile?.business_email||"",phone:profile?.business_phone||"",address:profile?.business_address||"",logo:profile?.business_logo_url||""}};return <div className="space-y-6 pb-10"><div className="flex flex-col gap-4 sm:flex-row sm:items-center"><Link href="/invoices" className={buttonVariants({variant:"ghost",size:"icon"})}><ArrowLeft/></Link><div className="min-w-0 flex-1"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-light">{invoice.status==="draft"?t("quote"):t("invoice")}</p><h1 className="mt-1 truncate text-2xl font-semibold tracking-tight">{invoice.invoice_number}</h1><p className="mt-1 truncate text-sm text-muted-foreground">{printable.clientName}</p></div><div className="flex flex-wrap gap-2"><InvoiceStatusActions invoiceId={invoice.id} status={invoice.status} compact/><InvoiceEditDialog invoice={invoice as any} items={(items??[]).map(i=>({id:i.id,description:i.description,amount:Number(i.amount||0)}))} contacts={(contacts??[]).map(c=>({id:c.id,label:getContactDisplayName(c)})).filter(x=>x.label)} projects={(projects??[]).map(p=>({id:p.id,label:p.name}))}/><DeleteEntityButton entity="invoice" id={invoice.id}/></div></div><PrintableInvoice invoice={printable}/></div>}
+import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
+export default async function InvoiceDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const t = await getTranslations("Invoices");
+  const supabase = await createClient();
+  const [
+    { data: invoice },
+    { data: items },
+    { data: profile },
+    { data: contacts },
+    { data: projects },
+  ] = await Promise.all([
+    supabase
+      .from("invoices")
+      .select(
+        "id,invoice_number,contact_id,project_id,pricing_type,fixed_amount,subtotal,tax_rate,tax_amount,discount,total,currency,status,issue_date,due_date,notes,contacts(type,first_name,last_name,company_name,email)",
+      )
+      .eq("id", id)
+      .maybeSingle(),
+    supabase
+      .from("invoice_items")
+      .select("id,description,amount,position")
+      .eq("invoice_id", id)
+      .order("position"),
+    supabase
+      .from("profiles")
+      .select(
+        "full_name,business_name,business_email,business_phone,business_address,business_logo_url,payment_terms,bank_details",
+      )
+      .maybeSingle(),
+    supabase
+      .from("contacts")
+      .select("id,type,first_name,last_name,company_name")
+      .eq("status", "active"),
+    supabase
+      .from("projects")
+      .select("id,name")
+      .order("created_at", { ascending: false }),
+  ]);
+  if (!invoice) notFound();
+  const contact =
+    (Array.isArray(invoice.contacts)
+      ? invoice.contacts[0]
+      : invoice.contacts) || {};
+  const printable = {
+    id: invoice.id,
+    number: invoice.invoice_number,
+    clientName: getContactDisplayName(contact) || "",
+    clientEmail: contact.email || "",
+    issueDate: invoice.issue_date,
+    dueDate: invoice.due_date,
+    status: invoice.status,
+    type: invoice.pricing_type,
+    notes:
+      invoice.notes || profile?.payment_terms || profile?.bank_details || "",
+    items: (items ?? []).map((item) => ({
+      description: item.description,
+      amount: Number(item.amount || 0),
+    })),
+    subtotal: Number(invoice.subtotal || 0),
+    taxRate: Number(invoice.tax_rate || 0),
+    taxAmount: Number(invoice.tax_amount || 0),
+    discount: Number(invoice.discount || 0),
+    total: Number(invoice.total || 0),
+    currency: invoice.currency || "USD",
+    business: {
+      name:
+        profile?.business_name?.trim() ||
+        profile?.full_name?.trim() ||
+        "Account owner",
+      email: profile?.business_email || "",
+      phone: profile?.business_phone || "",
+      address: profile?.business_address || "",
+      logo: profile?.business_logo_url || "",
+    },
+  };
+  return (
+    <div className="space-y-6 pb-10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <Link
+          href="/invoices"
+          className={buttonVariants({ variant: "ghost", size: "icon" })}
+        >
+          <ArrowLeft />
+        </Link>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-light">
+            {invoice.status === "draft" ? t("quote") : t("invoice")}
+          </p>
+          <h1 className="mt-1 truncate text-2xl font-semibold tracking-tight">
+            {invoice.invoice_number}
+          </h1>
+          <p className="mt-1 truncate text-sm text-muted-foreground">
+            {printable.clientName}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <InvoiceStatusActions
+            invoiceId={invoice.id}
+            status={invoice.status}
+            compact
+          />
+          <InvoiceFormDialog
+            invoice={invoice}
+            items={(items ?? []).map((i) => ({
+              id: i.id,
+              description: i.description,
+              amount: Number(i.amount || 0),
+            }))}
+            contacts={(contacts ?? [])
+              .map((c) => ({ id: c.id, label: getContactDisplayName(c) }))
+              .filter((x) => x.label)}
+            projects={(projects ?? []).map((p) => ({
+              id: p.id,
+              label: p.name,
+            }))}
+          />
+          <DeleteEntityButton entity="invoice" id={invoice.id} />
+        </div>
+      </div>
+      <PrintableInvoice invoice={printable} />
+    </div>
+  );
+}

@@ -1,5 +1,4 @@
 import { Card,CardContent,CardHeader,CardTitle } from "@/components/ui/card";
-import { Link } from "@/i18n/navigation";
 import { CircleCheck, FileText, FolderKanban, ListChecks, UserRound } from "lucide-react";
 import { useLocale,useTranslations } from "next-intl";
 import { formatRelative } from "@/lib/crm";

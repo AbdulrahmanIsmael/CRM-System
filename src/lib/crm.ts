@@ -11,16 +11,29 @@ export function getContactDisplayName(contact: {
   if (contact.type === "company" || contact.company_name) {
     if (contact.type === "company") return contact.company_name?.trim() || "";
   }
-  return `${contact.first_name ?? ""} ${contact.last_name ?? ""}`.trim() || contact.company_name?.trim() || "";
+  return (
+    `${contact.first_name ?? ""} ${contact.last_name ?? ""}`.trim() ||
+    contact.company_name?.trim() ||
+    ""
+  );
 }
 
 export function getInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
-  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase() ?? "").join("") || "U";
+  return (
+    parts
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || "U"
+  );
 }
 
-export function formatDate(value: string | Date | null | undefined, locale: "en" | "ar", options?: Intl.DateTimeFormatOptions) {
-  if (!value) return "—";
+export function formatDate(
+  value: string | Date | null | undefined,
+  locale: "en" | "ar",
+  options?: Intl.DateTimeFormatOptions,
+) {
+  if (!value) return "-";
   return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
     year: "numeric",
     month: "short",
@@ -29,8 +42,11 @@ export function formatDate(value: string | Date | null | undefined, locale: "en"
   }).format(new Date(value));
 }
 
-export function formatDateTime(value: string | Date | null | undefined, locale: "en" | "ar") {
-  if (!value) return "—";
+export function formatDateTime(
+  value: string | Date | null | undefined,
+  locale: "en" | "ar",
+) {
+  if (!value) return "-";
   return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
     year: "numeric",
     month: "short",
@@ -40,21 +56,35 @@ export function formatDateTime(value: string | Date | null | undefined, locale: 
   }).format(new Date(value));
 }
 
-export function formatCurrency(value: number | string | null | undefined, currency: string, locale: "en" | "ar") {
-  return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US", {
+export function formatCurrency(
+  value: number | string | null | undefined,
+  currency: string,
+  locale: "en" | "ar",
+) {
+  const amount = Number(value ?? 0);
+  if (locale === "ar") {
+    const number = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(amount);
+    return `${number} ${currency}`;
+  }
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
-  }).format(Number(value ?? 0));
+  }).format(amount);
 }
 
 export function formatRelative(value: string | Date, locale: "en" | "ar") {
   const dateFnsLocale: Locale = locale === "ar" ? ar : enUS;
-  return formatDistanceToNow(new Date(value), { addSuffix: true, locale: dateFnsLocale });
+  return formatDistanceToNow(new Date(value), {
+    addSuffix: true,
+    locale: dateFnsLocale,
+  });
 }
 
 export function getMonthLabel(date: Date, locale: "en" | "ar") {
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", { month: "short" }).format(date);
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
+    month: "short",
+  }).format(date);
 }
 
 export function toLocalDateInput(value: string | null | undefined) {
@@ -62,5 +92,9 @@ export function toLocalDateInput(value: string | null | undefined) {
 }
 
 export function sanitizeSearchTerm(value: string) {
-  return value.replace(/[\\%_(),.*"]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 80);
+  return value
+    .replace(/[\\%_(),.*"]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 80);
 }

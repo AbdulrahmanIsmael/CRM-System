@@ -50,8 +50,8 @@ export function Sidebar({ className }: { className?: string }) {
         >
           <BrandLogo
             alt={`${APP_NAME} Logo`}
-            width={148}
-            height={44}
+            width={200}
+            height={65}
             priority
             className="w-37"
           />

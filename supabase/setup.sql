@@ -1,5 +1,5 @@
 -- ============================================================
--- NEXUS CRM — COMPLETE SUPABASE SETUP
+-- NEXUS CRM - COMPLETE SUPABASE SETUP
 -- ============================================================
 -- Run this entire file once in the Supabase SQL Editor when
 -- setting up a fresh Nexus CRM database.
@@ -70,6 +70,10 @@ CREATE TABLE IF NOT EXISTS public.contacts (
   company_id    uuid REFERENCES public.contacts(id) ON DELETE SET NULL,
   email         text,
   phone         text,
+  phone_country_code text DEFAULT ' +20',
+  phone_number  text,
+  nationality   text,
+  lead_source   text DEFAULT 'direct',
   website       text,
   industry      text,
   location      text,
@@ -656,7 +660,7 @@ SET public = EXCLUDED.public,
     allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- ============================================================
--- 20. STORAGE RLS — PROFILE ASSETS
+-- 20. STORAGE RLS - PROFILE ASSETS
 -- ============================================================
 DROP POLICY IF EXISTS "Users can upload profile assets" ON storage.objects;
 CREATE POLICY "Users can upload profile assets"
@@ -689,7 +693,7 @@ CREATE POLICY "Users can delete profile assets"
 -- Public bucket: reads are public by bucket configuration.
 
 -- ============================================================
--- 21. STORAGE RLS — REPORT ASSETS
+-- 21. STORAGE RLS - REPORT ASSETS
 -- ============================================================
 DROP POLICY IF EXISTS "Users can upload report assets" ON storage.objects;
 CREATE POLICY "Users can upload report assets"

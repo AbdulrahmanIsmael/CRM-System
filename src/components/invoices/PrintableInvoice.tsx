@@ -6,13 +6,14 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { formatCurrency, formatDate } from "@/lib/crm";
 import { useLocale, useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
-import BrandLogo from "@/components/ui/BrandLogo";
 import { Button } from "@/components/ui/button";
+import { RichTextContent } from "@/components/reports/RichTextContent";
 import { useReactToPrint } from "react-to-print";
 
 export interface InvoiceItem {
@@ -90,7 +91,17 @@ export function PrintableInvoice({ invoice }: { invoice: Invoice }) {
             ]}
             onValueChange={(v) => setLayout(v as Layout)}
           >
-            <SelectTrigger className="w-36" />
+            <SelectTrigger className="w-36">
+              <SelectValue>
+                {(value: string | null) =>
+                  value === "modern"
+                    ? t("modern")
+                    : value === "classic"
+                      ? t("classic")
+                      : t("minimal")
+                }
+              </SelectValue>
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="modern">{t("modern")}</SelectItem>
               <SelectItem value="classic">{t("classic")}</SelectItem>
@@ -106,7 +117,17 @@ export function PrintableInvoice({ invoice }: { invoice: Invoice }) {
             ]}
             onValueChange={(v) => setAccent(v as Accent)}
           >
-            <SelectTrigger className="w-36" />
+            <SelectTrigger className="w-36">
+              <SelectValue>
+                {(value: string | null) =>
+                  value === "primary"
+                    ? t("nexusBlue")
+                    : value === "accent"
+                      ? t("nexusCyan")
+                      : t("nexusSecondary")
+                }
+              </SelectValue>
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="primary">{t("nexusBlue")}</SelectItem>
               <SelectItem value="accent">{t("nexusCyan")}</SelectItem>
@@ -149,18 +170,13 @@ export function PrintableInvoice({ invoice }: { invoice: Invoice }) {
               <div className="min-w-0">
                 {showBusiness ? (
                   <>
-                    <div className="mb-3 flex items-center gap-3">
-                      <BrandLogo
-                        alt="Nexus CRM"
-                        width={132}
-                        height={36}
-                        className="h-9 w-auto"
-                      />
-                    </div>
                     <h1 className="text-2xl font-bold" style={{ color }}>
                       {invoice.business.name || "Account owner"}
                     </h1>
-                    <p className="mt-2 whitespace-pre-line text-sm text-gray-500">
+                    <p
+                      dir="ltr"
+                      className="mt-2 whitespace-pre-line text-sm text-gray-500"
+                    >
                       {[
                         invoice.business.address,
                         invoice.business.email,
@@ -172,16 +188,22 @@ export function PrintableInvoice({ invoice }: { invoice: Invoice }) {
                   </>
                 ) : null}
               </div>
-              <div className="text-end">
+              <div className="text-start">
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
                   {invoice.status === "draft" ? t("quote") : t("invoice")}
                 </p>
-                <h2 className="mt-2 text-2xl font-semibold text-gray-800">
+
+                <h2
+                  dir="ltr"
+                  className="mt-2 text-2xl font-semibold text-gray-800"
+                >
                   {invoice.number}
                 </h2>
+
                 <p className="mt-2 text-sm text-gray-500">
                   {t("date")}: {formatDate(invoice.issueDate, locale)}
                 </p>
+
                 <p className="text-sm text-gray-500">
                   {t("dueDateLabel")}: {formatDate(invoice.dueDate, locale)}
                 </p>
@@ -196,8 +218,8 @@ export function PrintableInvoice({ invoice }: { invoice: Invoice }) {
               <p className="font-semibold text-gray-800">
                 {invoice.clientName}
               </p>
-              <p className="text-sm text-gray-500">
-                {invoice.clientEmail || "—"}
+              <p dir="ltr" className="text-sm text-gray-500">
+                {invoice.clientEmail || ""}
               </p>
             </div>
             <div className="sm:text-end">
@@ -276,7 +298,14 @@ export function PrintableInvoice({ invoice }: { invoice: Invoice }) {
           {showNotes ? (
             <div className="mt-14 border-t border-gray-200 pt-6 text-sm text-gray-500">
               <p className="font-semibold text-gray-700">{t("paymentTerms")}</p>
-              <p className="mt-2 whitespace-pre-line">{invoice.notes || "—"}</p>
+              {invoice.notes ? (
+                <RichTextContent
+                  value={invoice.notes}
+                  className="mt-2 text-gray-500 **:text-gray-500!"
+                />
+              ) : (
+                <p className="mt-2 text-gray-500">-</p>
+              )}
             </div>
           ) : null}
         </div>

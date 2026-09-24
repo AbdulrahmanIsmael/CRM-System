@@ -1,19 +1,21 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import Image from "next/image";
-import { useReactToPrint } from "react-to-print";
 import { ArrowDown, ArrowUp, ImagePlus, Save, Trash2, X } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { RichTextEditor } from "@/components/reports/RichTextEditor";
-import { ReportPrintDocument } from "@/components/reports/ReportPrintDocument";
 import { formatCurrency, formatDate, getInitials } from "@/lib/crm";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo, useRef, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
+import { ReportPrintDocument } from "@/components/reports/ReportPrintDocument";
+import { RichTextEditor } from "@/components/reports/RichTextEditor";
+import { createClient } from "@/lib/supabase/client";
 import { sanitizeReportHtml } from "@/lib/report";
+import { toast } from "sonner";
+import { useReactToPrint } from "react-to-print";
 
 export type ReportEditorSection = {
   id: string;
@@ -45,6 +47,7 @@ type Props = {
     email: string;
     phone: string;
     address: string;
+    logo: string;
   };
   initialTitle: string;
   initialSections: ReportEditorSection[];
@@ -71,7 +74,7 @@ export function ReportEditor({
 
   const print = useReactToPrint({
     contentRef: printRef,
-    documentTitle: title || `${t("defaultTitle")} — ${project.name}`,
+    documentTitle: title || `${t("defaultTitle")} - ${project.name}`,
   });
 
   const persist = async (showToast = true) => {
@@ -80,7 +83,8 @@ export function ReportEditor({
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("UNAUTHORIZED");
 
-      const nextTitle = title.trim() || `${t("defaultTitle")} — ${project.name}`;
+      const nextTitle =
+        title.trim() || `${t("defaultTitle")} - ${project.name}`;
       const { error: reportError } = await supabase
         .from("project_reports")
         .update({ title: nextTitle })
@@ -163,10 +167,7 @@ export function ReportEditor({
     ]);
   };
 
-  const updateSection = (
-    id: string,
-    patch: Partial<ReportEditorSection>,
-  ) => {
+  const updateSection = (id: string, patch: Partial<ReportEditorSection>) => {
     setSections((current) =>
       current.map((section) =>
         section.id === id ? { ...section, ...patch } : section,
@@ -295,7 +296,11 @@ export function ReportEditor({
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_360px]">
       <div className="space-y-5">
-        <Card className="rounded-3xl border-border/80 bg-card/95 shadow-sm">
+        <Card className="relative rounded-3xl border-border/80 bg-card/95 shadow-sm">
+          <LoadingOverlay
+            show={saving || Boolean(uploading)}
+            label={saving ? tc("saving") : tc("upload")}
+          />
           <CardHeader className="gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <CardTitle className="text-lg">{t("reportSections")}</CardTitle>
@@ -421,10 +426,14 @@ export function ReportEditor({
                           variant="outline"
                           size="sm"
                           disabled={uploading === section.id}
-                          onClick={() => fileInputs.current[section.id]?.click()}
+                          onClick={() =>
+                            fileInputs.current[section.id]?.click()
+                          }
                         >
                           <ImagePlus data-icon="inline-start" />
-                          {uploading === section.id ? tc("saving") : t("uploadImage")}
+                          {uploading === section.id
+                            ? tc("saving")
+                            : t("uploadImage")}
                         </Button>
                       </div>
                     </div>
@@ -438,7 +447,10 @@ export function ReportEditor({
                           >
                             <Image
                               src={image.url}
-                              alt={image.alt_text || `${section.title} — ${t("imageAlt")}`}
+                              alt={
+                                image.alt_text ||
+                                `${section.title} - ${t("imageAlt")}`
+                              }
                               width={900}
                               height={560}
                               className="aspect-video w-full object-cover"
@@ -447,8 +459,10 @@ export function ReportEditor({
                               type="button"
                               variant="secondary"
                               size="icon-sm"
-                              className="absolute end-2 top-2 opacity-100 shadow-md sm:opacity-0 sm:group-hover:opacity-100"
-                              onClick={() => void removeImage(section.id, image)}
+                              className="absolute inset-e-2 top-2 opacity-100 shadow-md sm:opacity-0 sm:group-hover:opacity-100"
+                              onClick={() =>
+                                void removeImage(section.id, image)
+                              }
                               aria-label={tc("remove")}
                             >
                               <X />
@@ -477,12 +491,9 @@ export function ReportEditor({
 
       <aside className="xl:sticky xl:top-24 xl:self-start">
         <Card className="overflow-hidden rounded-3xl border-border bg-card/95 shadow-sm">
-          <div className="relative h-28 bg-[radial-gradient(circle_at_20%_30%,rgb(75_84_197_/_0.45),transparent_35%),linear-gradient(135deg,rgb(47_57_169_/_0.18),rgb(73_164_187_/_0.08))]">
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-primary" />
-          </div>
-          <CardContent className="relative -mt-10 p-5">
+          <CardContent className="p-5">
             <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl border-4 border-card bg-primary/10 text-xl font-semibold text-primary-light shadow-xl">
-              {getInitials(business.name)}
+              {getInitials(project.clientName)}
             </div>
             <h2 className="mt-4 text-xl font-semibold">
               {title || t("defaultTitle")}
@@ -493,12 +504,22 @@ export function ReportEditor({
             <div className="mt-5 space-y-3 rounded-2xl border border-border bg-muted/20 p-4 text-sm">
               <div className="flex justify-between gap-4">
                 <span className="text-muted-foreground">{t("client")}</span>
-                <span className="text-end font-medium">{project.clientName}</span>
+                <span className="text-end font-medium">
+                  {project.clientName}
+                </span>
               </div>
               <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">{t("projectPeriod")}</span>
+                <span className="text-muted-foreground">
+                  {t("projectPeriod")}
+                </span>
                 <span className="text-end">
-                  {project.start_date ? formatDate(project.start_date, locale) : "—"} — {project.deadline ? formatDate(project.deadline, locale) : "—"}
+                  {project.start_date
+                    ? formatDate(project.start_date, locale)
+                    : "-"}{" "}
+                  -{" "}
+                  {project.deadline
+                    ? formatDate(project.deadline, locale)
+                    : "-"}
                 </span>
               </div>
               <div className="flex justify-between gap-4">
@@ -516,7 +537,7 @@ export function ReportEditor({
         </Card>
       </aside>
 
-      <div className="pointer-events-none fixed -left-[10000px] top-0 w-[794px] bg-white text-black print:static print:left-auto print:w-full">
+      <div className="pointer-events-none fixed left-[-10000px] top-0 w-198.5 bg-white text-black print:static print:left-auto print:w-full">
         <div ref={printRef}>
           <ReportPrintDocument
             title={title}

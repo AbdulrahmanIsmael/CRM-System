@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 
 export function InvoiceStatusActions({
   invoiceId,
@@ -55,7 +56,7 @@ export function InvoiceStatusActions({
     }
   }
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="relative"><LoadingOverlay show={loading} label={t("saving")} /><div className="flex flex-wrap gap-2">
       {(status === "draft" || status === "overdue") && (
         <Button
           type="button"
@@ -79,6 +80,6 @@ export function InvoiceStatusActions({
           {t("markPaid")}
         </Button>
       ) : null}
-    </div>
+    </div></div>
   );
 }

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import { useTransition } from "react";
+import { LoaderCircle } from "lucide-react";
 
 export default function LanguageSwitcher() {
   const locale = useLocale();
@@ -27,7 +28,7 @@ export default function LanguageSwitcher() {
       className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-surface-hover transition-colors text-sm font-medium"
       aria-label="Toggle language"
     >
-      {locale === "en" ? (
+      {isPending ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : locale === "en" ? (
         <span className="flex items-center gap-2">
           <Image
             src="/assets/flags/eg.svg"

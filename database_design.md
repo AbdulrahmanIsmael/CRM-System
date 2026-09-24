@@ -1,4 +1,4 @@
-# Nexus CRM — Supabase Database Design
+# Nexus CRM - Supabase Database Design
 
 ## Setup Instructions
 
@@ -127,12 +127,16 @@ Extends Supabase `auth.users`. Auto-created on signup via trigger.
 | `company_name` | `text` | | Company name (for type='company') |
 | `company_id` | `uuid` | FK → contacts.id, nullable | Link person to their company |
 | `email` | `text` | | |
-| `phone` | `text` | | |
+| `phone` | `text` | | Legacy combined phone value kept for compatibility |
+| `phone_country_code` | `text` | DEFAULT `'+20'` | Country calling code |
+| `phone_number` | `text` | | Local phone number without country code |
+| `nationality` | `text` | | Person nationality |
+| `lead_source` | `text` | DEFAULT `'direct'` | Acquisition/source channel |
 | `website` | `text` | | |
 | `industry` | `text` | | |
 | `location` | `text` | | City/country |
 | `timezone` | `text` | | |
-| `notes` | `text` | | Free-form notes |
+| `notes` | `text` | | Sanitized rich-text HTML |
 | `created_at` | `timestamptz` | DEFAULT `now()` | |
 | `updated_at` | `timestamptz` | DEFAULT `now()` | |
 
@@ -152,7 +156,7 @@ Extends Supabase `auth.users`. Auto-created on signup via trigger.
 | `color` | `text` | DEFAULT `'#94A3B8'` | Hex color |
 | `created_at` | `timestamptz` | DEFAULT `now()` | |
 
-**Unique constraint:** `(user_id, name)` — no duplicate tag names per user.
+**Unique constraint:** `(user_id, name)` - no duplicate tag names per user.
 
 ---
 
@@ -263,7 +267,7 @@ Extends Supabase `auth.users`. Auto-created on signup via trigger.
 
 **Statuses:** `draft`, `sent`, `paid`, `overdue`, `cancelled`
 
-**Unique constraint:** `(user_id, invoice_number)` — no duplicate invoice numbers per user.
+**Unique constraint:** `(user_id, invoice_number)` - no duplicate invoice numbers per user.
 
 ---
 
@@ -349,7 +353,7 @@ Stores one client-facing completion report per project. The application enforces
 | `created_at` | `timestamptz` | DEFAULT `now()` | |
 | `updated_at` | `timestamptz` | DEFAULT `now()` | |
 
-**Unique constraint:** `(user_id, project_id)` — one report per project per user.
+**Unique constraint:** `(user_id, project_id)` - one report per project per user.
 
 ### 15. `report_sections`
 
@@ -499,7 +503,7 @@ On every UPDATE to tables with `updated_at`, automatically set it to `now()`. Th
 
 ```sql
 -- ============================================================
--- NEXUS CRM — FULL DATABASE SETUP
+-- NEXUS CRM - FULL DATABASE SETUP
 -- Run this entire script in Supabase SQL Editor
 -- ============================================================
 
@@ -899,7 +903,7 @@ CREATE TRIGGER on_auth_user_created
 ## After Running the Script
 
 1. ✅ Verify all 13 tables appear in **Table Editor**
-2. ✅ Check **Authentication → Policies** — every table should show its RLS policies
+2. ✅ Check **Authentication → Policies** - every table should show its RLS policies
 3. ✅ Create a `.env.local` in your project root:
 
 ```env
@@ -907,7 +911,7 @@ NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-4. ✅ Test by creating an account — the `profiles` row and 6 default `deal_stages` should auto-create
+4. ✅ Test by creating an account - the `profiles` row and 6 default `deal_stages` should auto-create
 
 
 ## Nexus CRM Application Extensions
@@ -931,3 +935,22 @@ The extension objects are created by `supabase/migrations/20260921_reports_and_p
 ### Storage ownership model
 
 Uploaded object paths use the authenticated user's UUID as the first folder segment. RLS/Storage policies use that folder to isolate each user's files. `profile-assets` is public because the application renders avatar/cover/logo URLs directly; `report-assets` is private because report images are accessed for authenticated report editing/printing.
+
+
+## Current application additions
+
+### Contact enrichment
+
+Contacts support structured phone storage (`phone_country_code` + `phone_number`), nationality, and `lead_source`. The legacy `phone` column remains for backward compatibility with existing records.
+
+### Rich text
+
+Notes and descriptions use the same rich-text editor as Reports. Values are stored as sanitized HTML and rendered through the shared rich-text content component.
+
+### Reports lifecycle
+
+Reports can be edited from their detail/editor page and permanently deleted. Deleting a report removes its report rows and user-owned report image objects.
+
+### Search and loading
+
+List-page search uses a debounced client input with server-side query execution. Route-level loading UI and operation overlays provide feedback while asynchronous work is running.

@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatDate, getContactDisplayName } from "@/lib/crm";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { DeleteReportButton } from "@/components/reports/DeleteReportButton";
 import { Link } from "@/i18n/navigation";
 import { ReportCreateDialog } from "@/components/reports/ReportCreateDialog";
 import { buttonVariants } from "@/components/ui/button";
@@ -52,7 +53,7 @@ export default async function ReportsPage({
         | null;
       return {
         id: project.id,
-        label: `${project.name} — ${getContactDisplayName(contact ?? {})}`,
+        label: `${project.name} - ${getContactDisplayName(contact ?? {})}`,
       };
     });
   return (
@@ -106,18 +107,22 @@ export default async function ReportsPage({
                     <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                       <FileText className="size-5" />
                     </div>
-                    <Link
-                      href={`/reports/${report.id}`}
-                      className={buttonVariants({
-                        variant: "ghost",
-                        size: "icon-sm",
-                        className:
-                          "opacity-100 md:opacity-0 md:group-hover:opacity-100",
-                      })}
-                      aria-label={t("openReport")}
-                    >
-                      <ArrowUpRight />
-                    </Link>
+                    <div className="flex items-center gap-1">
+                      <Link
+                        href={`/reports/${report.id}`}
+                        className={buttonVariants({
+                          variant: "ghost",
+                          size: "icon-sm",
+                          className:
+                            "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+                        })}
+                        aria-label={tc("edit")}
+                        title={tc("edit")}
+                      >
+                        <ArrowUpRight />
+                      </Link>
+                      <DeleteReportButton reportId={report.id} />
+                    </div>
                   </div>
                   <h2 className="mt-5 truncate text-base font-semibold">
                     {report.title}

@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Mail, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AuthInput } from "./AuthInput";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/types/auth";
 import { createClient } from "@/lib/supabase/client";
 
@@ -18,6 +19,7 @@ interface ForgotPasswordFormProps {
 
 export function ForgotPasswordForm({ onToggleForm }: ForgotPasswordFormProps) {
   const t = useTranslations("Auth");
+  const tc = useTranslations("Common");
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
 
@@ -50,7 +52,8 @@ export function ForgotPasswordForm({ onToggleForm }: ForgotPasswordFormProps) {
   };
 
   return (
-    <div className="w-full max-w-md p-8 bg-surface rounded-2xl shadow-xl border border-border">
+    <div className="relative w-full max-w-md p-8 bg-surface rounded-2xl shadow-xl border border-border">
+      <LoadingOverlay show={isLoading} label={tc("loading")} />
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-bold text-text-primary mb-2">
           {t("forgotPasswordTitle")}

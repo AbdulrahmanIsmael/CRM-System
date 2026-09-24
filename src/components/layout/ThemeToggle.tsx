@@ -2,18 +2,18 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useSyncExternalStore } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
 
 const getTheme = () => {
-  if (typeof window === "undefined") {
+  if (typeof document === "undefined") {
     return "dark";
   }
 
-  return window.localStorage.getItem("nexus-theme") === "light"
-    ? "light"
-    : "dark";
+  const match = document.cookie.match(/(?:^|;\s*)nexus-theme=(dark|light)/);
+
+  return match?.[1] === "light" ? "light" : "dark";
 };
 
 const getServerTheme = () => "dark";
@@ -32,18 +32,21 @@ const subscribe = (callback: () => void) => {
 
 export function ThemeToggle() {
   const t = useTranslations("Navigation");
+  const locale = useLocale();
+
   const theme = useSyncExternalStore(subscribe, getTheme, getServerTheme);
 
   const dark = theme === "dark";
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
+  }, [dark, locale]);
 
   const toggle = () => {
     const next = dark ? "light" : "dark";
 
-    window.localStorage.setItem("nexus-theme", next);
+    document.cookie = `nexus-theme=${next}; path=/; max-age=31536000; samesite=lax`;
+
     document.documentElement.classList.toggle("dark", next === "dark");
 
     window.dispatchEvent(new Event("nexus-theme-change"));

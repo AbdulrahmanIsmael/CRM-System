@@ -40,21 +40,22 @@ export function SignInForm({ onToggleForm }: SignInFormProps) {
       });
 
       if (error) {
+        setIsLoading(false);
         toast.error(error.message);
         return;
       }
 
       router.push("/dashboard");
       router.refresh();
+      return;
     } catch (err) {
-      toast.error("An unexpected error occurred");
-    } finally {
       setIsLoading(false);
+      toast.error("An unexpected error occurred");
     }
   };
 
   return (
-    <div className="w-full max-w-md p-8 bg-surface rounded-2xl shadow-xl border border-border">
+    <div className="relative w-full max-w-md p-8 bg-surface rounded-2xl shadow-xl border border-border">
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-bold text-text-primary mb-2">
           {t("signInTitle")}
