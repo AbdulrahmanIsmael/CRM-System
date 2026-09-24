@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 type Stage = {
@@ -78,7 +78,7 @@ export function SettingsForm({
 }) {
   const t = useTranslations("Settings"),
     tc = useTranslations("Common");
-  const supabase = createClient(),
+  const supabase = useMemo(() => createClient(), []),
     router = useRouter();
   const [form, setForm] = useState(profile);
   const [accountEmail, setAccountEmail] = useState(email);

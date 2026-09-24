@@ -459,7 +459,7 @@ export function ReportEditor({
                               type="button"
                               variant="secondary"
                               size="icon-sm"
-                              className="absolute inset-e-2 top-2 opacity-100 shadow-md sm:opacity-0 sm:group-hover:opacity-100"
+                              className="absolute inset-e-2 top-2 shadow-md row-actions"
                               onClick={() =>
                                 void removeImage(section.id, image)
                               }

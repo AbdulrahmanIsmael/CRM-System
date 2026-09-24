@@ -216,3 +216,15 @@
     animation-iteration-count: 1 !important;
   }
 }
+
+@media (hover: hover) and (pointer: fine) {
+  .row-actions {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+  .group:hover .row-actions,
+  .group:focus-within .row-actions,
+  .row-actions:focus-within {
+    opacity: 1;
+  }
+}

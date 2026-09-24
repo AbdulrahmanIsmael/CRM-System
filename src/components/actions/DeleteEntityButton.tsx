@@ -10,13 +10,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 type Entity = "contact" | "deal" | "project" | "task" | "event" | "invoice";
@@ -45,7 +45,7 @@ export function DeleteEntityButton({
     event: "/calendar",
     invoice: "/invoices",
   };
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 

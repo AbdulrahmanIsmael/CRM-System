@@ -59,7 +59,7 @@ export default async function LocaleLayout({
 }) {
   const cookieStore = await cookies();
   const theme = cookieStore.get("nexus-theme")?.value;
-  const isDark = theme === "dark";
+  const isDark = theme !== "light";
 
   const { locale } = await params;
   if (!routing.locales.includes(locale as AppLocale)) {

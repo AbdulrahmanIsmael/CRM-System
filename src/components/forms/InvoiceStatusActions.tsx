@@ -1,14 +1,14 @@
 "use client";
 
 import { CheckCircle2, Send } from "lucide-react";
+import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { Button } from "@/components/ui/button";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { LoadingOverlay } from "@/components/ui/loading-overlay";
 
 export function InvoiceStatusActions({
   invoiceId,
@@ -20,7 +20,7 @@ export function InvoiceStatusActions({
   compact?: boolean;
 }) {
   const t = useTranslations("Common");
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
@@ -56,30 +56,33 @@ export function InvoiceStatusActions({
     }
   }
   return (
-    <div className="relative"><LoadingOverlay show={loading} label={t("saving")} /><div className="flex flex-wrap gap-2">
-      {(status === "draft" || status === "overdue") && (
-        <Button
-          type="button"
-          variant="outline"
-          size={compact ? "sm" : "default"}
-          disabled={loading}
-          onClick={() => updateStatus("sent")}
-        >
-          <Send data-icon="inline-start" />
-          {t("markSent")}
-        </Button>
-      )}
-      {status === "sent" || status === "overdue" ? (
-        <Button
-          type="button"
-          size={compact ? "sm" : "default"}
-          disabled={loading}
-          onClick={() => updateStatus("paid")}
-        >
-          <CheckCircle2 data-icon="inline-start" />
-          {t("markPaid")}
-        </Button>
-      ) : null}
-    </div></div>
+    <div className="relative">
+      <LoadingOverlay show={loading} label={t("saving")} />
+      <div className="flex flex-wrap gap-2">
+        {(status === "draft" || status === "overdue") && (
+          <Button
+            type="button"
+            variant="outline"
+            size={compact ? "sm" : "default"}
+            disabled={loading}
+            onClick={() => updateStatus("sent")}
+          >
+            <Send data-icon="inline-start" />
+            {t("markSent")}
+          </Button>
+        )}
+        {status === "sent" || status === "overdue" ? (
+          <Button
+            type="button"
+            size={compact ? "sm" : "default"}
+            disabled={loading}
+            onClick={() => updateStatus("paid")}
+          >
+            <CheckCircle2 data-icon="inline-start" />
+            {t("markPaid")}
+          </Button>
+        ) : null}
+      </div>
+    </div>
   );
 }

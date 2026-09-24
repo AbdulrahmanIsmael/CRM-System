@@ -30,6 +30,8 @@ export function RevenueOverview({
   const t = useTranslations("Dashboard");
   const locale = useLocale() as "en" | "ar";
   const hasData = data.some((point) => point.revenue > 0 || point.invoices > 0);
+  const isRtl = locale === "ar";
+
   return (
     <Card className="h-full rounded-2xl">
       <CardHeader className="pb-2">
@@ -62,7 +64,12 @@ export function RevenueOverview({
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={data}
-                margin={{ top: 10, right: 8, left: -12, bottom: 0 }}
+                margin={{
+                  top: 10,
+                  right: isRtl ? 0 : 8,
+                  left: isRtl ? 8 : 0,
+                  bottom: 0,
+                }}
               >
                 <CartesianGrid
                   stroke="var(--color-border)"
@@ -70,12 +77,15 @@ export function RevenueOverview({
                   vertical={false}
                 />
                 <XAxis
+                  reversed={isRtl}
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: "var(--color-text-muted)", fontSize: 11 }}
                 />
                 <YAxis
+                  orientation={isRtl ? "right" : "left"}
+                  width={52}
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: "var(--color-text-muted)", fontSize: 11 }}

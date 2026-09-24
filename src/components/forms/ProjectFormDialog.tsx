@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Pencil, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -16,17 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { Button } from "@/components/ui/button";
 import { DateInput } from "@/components/ui/date-input";
 import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { Pencil, Plus } from "lucide-react";
 import { RichTextEditor } from "@/components/reports/RichTextEditor";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 type Option = { id: string; label: string; contactId?: string };
@@ -58,7 +58,7 @@ export function ProjectFormDialog({
   const isEdit = Boolean(project);
   const t = useTranslations("Projects");
   const tc = useTranslations("Common");
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(autoOpen);
@@ -175,25 +175,30 @@ export function ProjectFormDialog({
               )}
             </Button>
           ) : (
-            <Button size="lg" className="shadow-[0_10px_30px_rgb(47_57_169/0.2)]">
+            <Button
+              size="lg"
+              className="shadow-[0_10px_30px_rgb(47_57_169/0.2)]"
+            >
               <Plus data-icon="inline-start" />
               {t("addProject")}
             </Button>
           )
         }
       />
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col overflow-hidden sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? `${tc("edit")} - ${t("projectDetails")}` : t("addProject")}
+            {isEdit
+              ? `${tc("edit")} - ${t("projectDetails")}`
+              : t("addProject")}
           </DialogTitle>
           <DialogDescription>
             {isEdit ? t("editDescription") : t("createDescription")}
           </DialogDescription>
         </DialogHeader>
-        <div className="relative">
-          <LoadingOverlay show={loading} label={tc("saving")} />
-          <form onSubmit={submit} className="space-y-5">
+        <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+          <div className="relative min-h-0 flex-1 space-y-5 overflow-y-auto">
+            <LoadingOverlay show={loading} label={tc("saving")} />
             <label className="space-y-4 text-sm block">
               <span>{t("name")}</span>
               <Input
@@ -212,7 +217,8 @@ export function ProjectFormDialog({
                     update("contactId", next);
                     if (
                       form.dealId &&
-                      deals.find((deal) => deal.id === form.dealId)?.contactId !== next
+                      deals.find((deal) => deal.id === form.dealId)
+                        ?.contactId !== next
                     ) {
                       update("dealId", "");
                     }
@@ -236,7 +242,10 @@ export function ProjectFormDialog({
                   value={form.dealId || "none"}
                   items={[
                     { value: "none", label: tc("none") },
-                    ...filteredDeals.map((x) => ({ value: x.id, label: x.label })),
+                    ...filteredDeals.map((x) => ({
+                      value: x.id,
+                      label: x.label,
+                    })),
                   ]}
                   onValueChange={(v) =>
                     update("dealId", v === "none" ? "" : String(v))
@@ -258,7 +267,7 @@ export function ProjectFormDialog({
             </div>
             <div className="space-y-4 text-sm block">
               <span>
-                {t("description")} {" "}
+                {t("description")}{" "}
                 <em className="text-xs text-muted-foreground">
                   ({tc("optional")})
                 </em>
@@ -287,13 +296,17 @@ export function ProjectFormDialog({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {["not_started", "in_progress", "on_hold", "completed", "cancelled"].map(
-                      (v) => (
-                        <SelectItem key={v} value={v}>
-                          {t(`statuses.${v}`)}
-                        </SelectItem>
-                      ),
-                    )}
+                    {[
+                      "not_started",
+                      "in_progress",
+                      "on_hold",
+                      "completed",
+                      "cancelled",
+                    ].map((v) => (
+                      <SelectItem key={v} value={v}>
+                        {t(`statuses.${v}`)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </label>
@@ -326,20 +339,20 @@ export function ProjectFormDialog({
                 />
               </label>
             </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
-                {tc("cancel")}
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
-              </Button>
-            </DialogFooter>
-          </form>
-        </div>
+          </div>
+          <DialogFooter className="shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              {tc("cancel")}
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

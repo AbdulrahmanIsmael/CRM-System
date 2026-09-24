@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
 import { Checkbox } from "@/components/ui/checkbox";
-import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 export function ProjectTaskToggle({ id, done }: { id: string; done: boolean }) {
   const t = useTranslations("Tasks");
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 

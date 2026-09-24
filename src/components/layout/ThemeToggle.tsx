@@ -39,8 +39,8 @@ export function ThemeToggle() {
   const dark = theme === "dark";
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark, locale]);
+    document.documentElement.classList.toggle("dark", getTheme() === "dark");
+  }, [locale]);
 
   const toggle = () => {
     const next = dark ? "light" : "dark";
@@ -61,7 +61,8 @@ export function ThemeToggle() {
       aria-label={`${t("theme")}: ${dark ? t("light") : t("dark")}`}
       title={`${t("theme")}: ${dark ? t("light") : t("dark")}`}
     >
-      {dark ? <Sun /> : <Moon />}
+      <Sun className="hidden dark:block" />
+      <Moon className="dark:hidden" />
     </Button>
   );
 }

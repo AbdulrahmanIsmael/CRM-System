@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Pencil, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -16,17 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { Button } from "@/components/ui/button";
 import { DateInput } from "@/components/ui/date-input";
 import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { Pencil, Plus } from "lucide-react";
 import { RichTextEditor } from "@/components/reports/RichTextEditor";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 type Option = { id: string; label: string };
@@ -58,7 +58,7 @@ export function DealFormDialog({
   const isEdit = Boolean(deal);
   const t = useTranslations("Deals");
   const tc = useTranslations("Common");
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(autoOpen);
@@ -173,14 +173,17 @@ export function DealFormDialog({
               )}
             </Button>
           ) : (
-            <Button size="lg" className="shadow-[0_10px_30px_rgb(47_57_169/0.2)]">
+            <Button
+              size="lg"
+              className="shadow-[0_10px_30px_rgb(47_57_169/0.2)]"
+            >
               <Plus data-icon="inline-start" />
               {t("addDeal")}
             </Button>
           )
         }
       />
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col overflow-hidden sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {isEdit ? `${tc("edit")} - ${t("title")}` : t("addDeal")}
@@ -189,9 +192,10 @@ export function DealFormDialog({
             {isEdit ? t("editDescription") : t("createDescription")}
           </DialogDescription>
         </DialogHeader>
-        <div className="relative">
+        <div className="relative flex min-h-0 flex-1">
           <LoadingOverlay show={loading} label={tc("saving")} />
-          <form onSubmit={submit} className="space-y-5">
+          <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto">
             <label className="space-y-4 text-sm block">
               <span>{t("titleLabel")}</span>
               <Input
@@ -289,7 +293,7 @@ export function DealFormDialog({
             </div>
             <div className="space-y-4 text-sm block">
               <span>
-                {t("notes")} {" "}
+                {t("notes")}{" "}
                 <em className="text-xs text-muted-foreground">
                   ({tc("optional")})
                 </em>
@@ -300,7 +304,8 @@ export function DealFormDialog({
                 placeholder={t("notes")}
               />
             </div>
-            <DialogFooter>
+            </div>
+            <DialogFooter className="shrink-0">
               <Button
                 type="button"
                 variant="outline"

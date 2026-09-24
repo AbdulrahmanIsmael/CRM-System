@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,6 @@ import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { RichTextEditor } from "@/components/reports/RichTextEditor";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 type Option = { id: string; label: string };
@@ -75,7 +75,7 @@ export function EventFormDialog({
   const isEdit = Boolean(event);
   const t = useTranslations("Calendar");
   const tc = useTranslations("Common");
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(autoOpen);
@@ -210,7 +210,7 @@ export function EventFormDialog({
           )
         }
       />
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col overflow-hidden sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {isEdit ? `${tc("edit")} - ${t("title")}` : t("newEvent")}
@@ -219,9 +219,9 @@ export function EventFormDialog({
             {isEdit ? t("editDescription") : t("subtitle")}
           </DialogDescription>
         </DialogHeader>
-        <div className="relative">
-          <LoadingOverlay show={loading} label={tc("saving")} />
-          <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+          <div className="relative min-h-0 flex-1 space-y-4 overflow-y-auto">
+            <LoadingOverlay show={loading} label={tc("saving")} />
             <label className="space-y-4 text-sm block">
               <span>{tc("title")}</span>
               <Input
@@ -330,20 +330,20 @@ export function EventFormDialog({
               />
               <span>{t("allDay")}</span>
             </label>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
-                {tc("cancel")}
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
-              </Button>
-            </DialogFooter>
-          </form>
-        </div>
+          </div>
+          <DialogFooter className="shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              {tc("cancel")}
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

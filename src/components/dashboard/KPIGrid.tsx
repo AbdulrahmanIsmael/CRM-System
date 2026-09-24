@@ -34,6 +34,7 @@ export async function KPIGrid({
       meta: t("paidRevenue"),
       icon: CircleDollarSign,
       tone: "text-success bg-success/10",
+      wide: true,
     },
     {
       label: t("activeProjects"),
@@ -41,6 +42,7 @@ export async function KPIGrid({
       meta: t("activeNow"),
       icon: FolderKanban,
       tone: "text-primary-light bg-primary/10",
+      wide: true,
     },
     {
       label: t("totalClients"),
@@ -48,6 +50,7 @@ export async function KPIGrid({
       meta: t("contactsCount"),
       icon: UsersRound,
       tone: "text-accent bg-accent/10",
+      wide: true,
     },
     {
       label: t("pendingInvoices"),
@@ -55,6 +58,7 @@ export async function KPIGrid({
       meta: t("awaitingPayment"),
       icon: FileText,
       tone: "text-warning bg-warning/10",
+      wide: true,
     },
     {
       label: t("overdueTasks"),
@@ -62,32 +66,31 @@ export async function KPIGrid({
       meta: t("needAttention"),
       icon: ListChecks,
       tone: "text-danger bg-danger/10",
+      wide: true,
     },
   ];
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-      {items.map(({ label, value, meta, icon: Icon, tone }) => (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+      {items.map(({ label, value, meta, icon: Icon, tone, wide }) => (
         <div
           key={label}
-          className="group rounded-2xl border border-border/80 bg-card/95 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_16px_36px_rgb(0_0_0/0.14)]"
+          className={`group rounded-2xl border border-border/80 bg-card/95 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_16px_36px_rgb(0_0_0/0.14)] ${wide ? "sm:col-span-2 2xl:col-span-1" : ""}`}
         >
-          <div className="flex items-start gap-3">
+          <div className="flex items-center gap-3">
             <div className={`rounded-2xl p-2.5 ${tone}`}>
               <Icon className="size-5" />
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-muted-foreground">
-                {label}
-              </p>
-              <p
-                dir="ltr"
-                className="mt-1 truncate text-2xl font-semibold tracking-tight text-end sm:text-[1.65rem]"
-              >
-                {value}
-              </p>
-            </div>
+            <p className="min-w-0 text-xs font-medium text-muted-foreground">
+              {label}
+            </p>
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">{meta}</p>
+          <p
+            dir="ltr"
+            className="mt-3 truncate text-2xl font-semibold tracking-tight text-start rtl:text-end sm:text-[1.65rem]"
+          >
+            {value}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{meta}</p>
         </div>
       ))}
     </div>

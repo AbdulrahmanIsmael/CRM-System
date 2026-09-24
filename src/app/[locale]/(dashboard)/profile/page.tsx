@@ -6,6 +6,7 @@ import {
   Settings2,
   WalletCards,
 } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import Image from "next/image";
@@ -30,26 +31,19 @@ export default async function ProfilePage() {
   const name = p?.full_name || auth.user?.email?.split("@")[0] || "";
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-10">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-light">
-            Nexus CRM
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-            {t("profile")}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("profileSubtitle")}
-          </p>
-        </div>
-        <Link
-          href="/settings"
-          className={buttonVariants({ variant: "outline", size: "lg" })}
-        >
-          <Settings2 data-icon="inline-start" />
-          {t("openSettings")}
-        </Link>
-      </div>
+      <PageHeader
+        title={t("profile")}
+        subtitle={t("profileSubtitle")}
+        action={
+          <Link
+            href="/settings"
+            className={buttonVariants({ variant: "outline", size: "lg" })}
+          >
+            <Settings2 data-icon="inline-start" />
+            {t("openSettings")}
+          </Link>
+        }
+      />
       <Card className="overflow-hidden">
         <div className="relative h-36 overflow-hidden bg-[radial-gradient(circle_at_20%_30%,rgb(75_84_197/0.45),transparent_35%),linear-gradient(135deg,rgb(47_57_169/0.18),rgb(73_164_187/0.08))]">
           {p?.cover_image_url ? (

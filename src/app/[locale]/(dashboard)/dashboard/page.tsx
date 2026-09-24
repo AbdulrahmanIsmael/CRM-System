@@ -11,10 +11,6 @@ import {
   SalesPipeline,
 } from "@/components/dashboard/SalesPipeline";
 import {
-  RevenueDataPoint,
-  RevenueOverview,
-} from "@/components/dashboard/RevenueOverview";
-import {
   UpcomingEventData,
   UpcomingEvents,
 } from "@/components/dashboard/UpcomingEvents";
@@ -27,16 +23,19 @@ import { endOfWeek, startOfDay, startOfMonth, subMonths } from "date-fns";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { KPIGrid } from "@/components/dashboard/KPIGrid";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import type { RevenueDataPoint } from "@/components/dashboard/RevenueOverview";
+import { RevenueOverviewLazy } from "@/components/dashboard/RevenueOverviewLazy";
 import { createClient } from "@/lib/supabase/server";
 import { getContactDisplayName } from "@/lib/crm";
 import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
   const locale = (await getLocale()) as "en" | "ar";
   const { data: auth } = await supabase.auth.getUser();
   const userId = auth.user?.id;
-  if (!userId) return null;
+  if (!userId) redirect({ href: "/sign-in", locale });
 
   const now = new Date();
   const monthStart = startOfMonth(now);
@@ -57,6 +56,7 @@ export default async function DashboardPage() {
     activityRes,
     projectsRes,
     tasksRes,
+    projectTasksRes,
     eventsRes,
   ] = await Promise.all([
     supabase
@@ -118,6 +118,10 @@ export default async function DashboardPage() {
       .lte("due_date", weekEnd.toISOString())
       .order("due_date", { ascending: true })
       .limit(5),
+    supabase
+      .from("tasks")
+      .select("project_id,status,projects!inner(status)")
+      .in("projects.status", ["not_started", "in_progress", "on_hold"]),
     supabase
       .from("events")
       .select(
@@ -207,14 +211,6 @@ export default async function DashboardPage() {
       action: log.action,
     }),
   );
-
-  const projectIds = (projectsRes.data ?? []).map((project) => project.id);
-  const projectTasksRes = projectIds.length
-    ? await supabase
-        .from("tasks")
-        .select("project_id,status")
-        .in("project_id", projectIds)
-    : { data: [] as { project_id: string | null; status: string }[] };
   const activeProjects: ActiveProjectData[] = (projectsRes.data ?? []).map(
     (project) => {
       const tasks = (projectTasksRes.data ?? []).filter(
@@ -241,7 +237,7 @@ export default async function DashboardPage() {
       title: task.title,
       dueDate: task.due_date ? new Date(task.due_date) : null,
       priority: task.priority,
-      linkedName: (task.projects?.[0]?.name) || getRelatedName(task.contacts),
+      linkedName: task.projects?.[0]?.name || getRelatedName(task.contacts),
     }),
   );
   const upcomingEvents: UpcomingEventData[] = (eventsRes.data ?? []).map(
@@ -265,12 +261,12 @@ export default async function DashboardPage() {
         pendingInvoices={pendingInvoicesRes.count ?? 0}
         overdueTasks={overdueTasksRes.count ?? 0}
       />
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(250px,1fr)_minmax(250px,1fr)]">
-        <RevenueOverview data={months} currency={currency} />
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,2fr)_minmax(250px,1fr)_minmax(250px,1fr)]">
+        <RevenueOverviewLazy data={months} currency={currency} />
         <SalesPipeline stages={pipeline} />
         <UpcomingTasks tasks={upcomingTasks} />
       </div>
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1.25fr)_minmax(280px,0.8fr)]">
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1.25fr)_minmax(280px,0.8fr)]">
         <RecentActivity activities={recentActivities} />
         <ActiveProjects projects={activeProjects} />
         <div className="grid gap-4">

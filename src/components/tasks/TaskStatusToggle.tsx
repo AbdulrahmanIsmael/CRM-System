@@ -1,16 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { CheckCircle2, Circle, LoaderCircle } from "lucide-react";
+import { useMemo, useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { CheckCircle2, Circle, LoaderCircle } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
-export function TaskStatusToggle({ id, status }: { id: string; status: string }) {
+export function TaskStatusToggle({
+  id,
+  status,
+}: {
+  id: string;
+  status: string;
+}) {
   const t = useTranslations("Tasks");
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +27,10 @@ export function TaskStatusToggle({ id, status }: { id: string; status: string })
     try {
       const { error } = await supabase
         .from("tasks")
-        .update({ status: next, completed_at: next === "done" ? new Date().toISOString() : null })
+        .update({
+          status: next,
+          completed_at: next === "done" ? new Date().toISOString() : null,
+        })
         .eq("id", id);
       if (error) throw error;
       router.refresh();

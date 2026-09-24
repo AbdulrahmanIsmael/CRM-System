@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useLocale, useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "./GlobalSearch";
@@ -22,7 +23,6 @@ import { ThemeToggle } from "./ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
 import { getInitials } from "@/lib/crm";
 import { useRouter } from "@/i18n/navigation";
-import { useState } from "react";
 
 export function Header({
   initialProfile,
@@ -34,7 +34,7 @@ export function Header({
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const profile = initialProfile;
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   async function logout() {
     await supabase.auth.signOut();

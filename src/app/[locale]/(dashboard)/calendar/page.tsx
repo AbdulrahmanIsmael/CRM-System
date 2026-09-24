@@ -6,6 +6,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { DeleteEntityButton } from "@/components/actions/DeleteEntityButton";
 import { EventFormDialog } from "@/components/forms/EventFormDialog";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { RichTextContent } from "@/components/reports/RichTextContent";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
@@ -117,25 +118,18 @@ export default async function CalendarPage({
     .slice(0, 30);
   return (
     <div className="space-y-6 pb-10">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-light">
-            Nexus CRM
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            {t("subtitle")}
-          </p>
-        </div>
-        <EventFormDialog
-          contacts={contactOptions}
-          projects={projectOptions}
-          deals={dealOptions}
-          autoOpen={params.action === "new"}
-        />
-      </div>
+      <PageHeader
+        title={t("title")}
+        subtitle={t("subtitle")}
+        action={
+          <EventFormDialog
+            contacts={contactOptions}
+            projects={projectOptions}
+            deals={dealOptions}
+            autoOpen={params.action === "new"}
+          />
+        }
+      />
       <div className="space-y-4">
         {/* Upcoming */}
         <Card className="overflow-hidden rounded-2xl border-border/80 bg-card/95">
@@ -192,7 +186,7 @@ export default async function CalendarPage({
                       </Badge>
 
                       {row.kind === "event" && (
-                        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100">
+                        <div className="flex items-center gap-1 row-actions">
                           <EventFormDialog
                             event={row.event}
                             contacts={contactOptions}

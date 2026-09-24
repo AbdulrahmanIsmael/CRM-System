@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -21,7 +21,7 @@ export function SignInForm({ onToggleForm }: SignInFormProps) {
   const t = useTranslations("Auth");
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const {
     register,
@@ -49,6 +49,7 @@ export function SignInForm({ onToggleForm }: SignInFormProps) {
       router.refresh();
       return;
     } catch (err) {
+      console.log(err);
       setIsLoading(false);
       toast.error("An unexpected error occurred");
     }

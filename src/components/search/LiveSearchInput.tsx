@@ -4,6 +4,8 @@ import { LoaderCircle, Search, X } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
+import { useTranslations } from "next-intl";
+
 export function LiveSearchInput({
   value = "",
   placeholder,
@@ -17,6 +19,7 @@ export function LiveSearchInput({
   const pathname = usePathname();
   const [query, setQuery] = useState(value);
   const [isPending, startTransition] = useTransition();
+  const tc = useTranslations("Common");
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -47,7 +50,7 @@ export function LiveSearchInput({
           type="button"
           onClick={() => setQuery("")}
           className="absolute inset-e-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          aria-label="Clear search"
+          aria-label={tc("clearSearch")}
         >
           <X className="size-4" />
         </button>

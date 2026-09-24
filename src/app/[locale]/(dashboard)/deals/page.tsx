@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { createClient } from "@/lib/supabase/server";
 import { KanbanBoard } from "@/components/deals/KanbanBoard";
 import { DealFormDialog } from "@/components/forms/DealFormDialog";
@@ -20,13 +21,17 @@ export default async function DealsPage({ searchParams }: { searchParams?: Promi
 
   return (
     <div className="flex h-full flex-col space-y-6">
-      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{tNav("deals")}</h1>
-          <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
-        </div>
-        <DealFormDialog contacts={contactOptions} stages={stageOptions} autoOpen={params.action === "new"} />
-      </div>
+      <PageHeader
+        title={tNav("deals")}
+        subtitle={t("subtitle")}
+        action={
+          <DealFormDialog
+            contacts={contactOptions}
+            stages={stageOptions}
+            autoOpen={params.action === "new"}
+          />
+        }
+      />
 
       <div className="min-h-0 flex-1">
         <KanbanBoard />

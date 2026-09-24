@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Pencil, Plus } from "lucide-react";
 import { PhoneField, splitLegacyPhone } from "@/components/contacts/PhoneField";
 import {
   Select,
@@ -17,17 +18,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { Button } from "@/components/ui/button";
 import { CONTACT_LEAD_SOURCES } from "@/constants";
 import { Input } from "@/components/ui/input";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { Pencil, Plus } from "lucide-react";
 import { RichTextEditor } from "@/components/reports/RichTextEditor";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 type Contact = {
@@ -60,7 +60,7 @@ export function ContactFormDialog({
   const isEdit = Boolean(contact);
   const t = useTranslations("Contacts");
   const tc = useTranslations("Common");
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const pathname = usePathname();
   const parsedPhone = contact
@@ -215,25 +215,30 @@ export function ContactFormDialog({
               )}
             </Button>
           ) : (
-            <Button size="lg" className="shadow-[0_10px_30px_rgb(47_57_169/0.2)]">
+            <Button
+              size="lg"
+              className="shadow-[0_10px_30px_rgb(47_57_169/0.2)]"
+            >
               <Plus data-icon="inline-start" />
               {t("addContact")}
             </Button>
           )
         }
       />
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+      <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col overflow-hidden sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? `${tc("edit")} - ${t("contactDetails")}` : t("addContact")}
+            {isEdit
+              ? `${tc("edit")} - ${t("contactDetails")}`
+              : t("addContact")}
           </DialogTitle>
           <DialogDescription>
             {isEdit ? t("editDescription") : t("createDescription")}
           </DialogDescription>
         </DialogHeader>
-        <div className="relative">
-          <LoadingOverlay show={loading} label={tc("saving")} />
-          <form onSubmit={submit} className="space-y-5">
+        <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+          <div className="relative min-h-0 flex-1 space-y-5 overflow-y-auto">
+            <LoadingOverlay show={loading} label={tc("saving")} />
             <label className="block space-y-2.5 text-sm">
               <span>{t("type")}</span>
               <Select
@@ -266,7 +271,7 @@ export function ContactFormDialog({
                 </label>
                 <label className="block space-y-2.5 text-sm">
                   <span>
-                    {t("lastName")} {" "}
+                    {t("lastName")}{" "}
                     <em className="text-xs text-muted-foreground">
                       ({tc("optional")})
                     </em>
@@ -289,7 +294,7 @@ export function ContactFormDialog({
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block space-y-2.5 text-sm">
                 <span>
-                  {t("email")} {" "}
+                  {t("email")}{" "}
                   <em className="text-xs text-muted-foreground">
                     ({tc("optional")})
                   </em>
@@ -302,7 +307,7 @@ export function ContactFormDialog({
               </label>
               <label className="block space-y-2.5 text-sm">
                 <span>
-                  {t("phone")} {" "}
+                  {t("phone")}{" "}
                   <em className="text-xs text-muted-foreground">
                     ({tc("optional")})
                   </em>
@@ -317,7 +322,7 @@ export function ContactFormDialog({
               {type === "person" ? (
                 <label className="block space-y-2.5 text-sm">
                   <span>
-                    {t("nationality")} {" "}
+                    {t("nationality")}{" "}
                     <em className="text-xs text-muted-foreground">
                       ({tc("optional")})
                     </em>
@@ -353,7 +358,9 @@ export function ContactFormDialog({
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">{t("leadSources.none")}</SelectItem>
+                    <SelectItem value="none">
+                      {t("leadSources.none")}
+                    </SelectItem>
                     {CONTACT_LEAD_SOURCES.map((value) => (
                       <SelectItem key={value} value={value}>
                         {t(`leadSources.${value}`)}
@@ -366,7 +373,7 @@ export function ContactFormDialog({
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block space-y-2.5 text-sm">
                 <span>
-                  {t("website")} {" "}
+                  {t("website")}{" "}
                   <em className="text-xs text-muted-foreground">
                     ({tc("optional")})
                   </em>
@@ -378,7 +385,7 @@ export function ContactFormDialog({
               </label>
               <label className="block space-y-2.5 text-sm">
                 <span>
-                  {t("location")} {" "}
+                  {t("location")}{" "}
                   <em className="text-xs text-muted-foreground">
                     ({tc("optional")})
                   </em>
@@ -391,7 +398,7 @@ export function ContactFormDialog({
             </div>
             <div className="block space-y-2.5 text-sm">
               <span>
-                {t("notes")} {" "}
+                {t("notes")}{" "}
                 <em className="text-xs text-muted-foreground">
                   ({tc("optional")})
                 </em>
@@ -402,20 +409,20 @@ export function ContactFormDialog({
                 placeholder={t("notes")}
               />
             </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
-                {tc("cancel")}
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
-              </Button>
-            </DialogFooter>
-          </form>
-        </div>
+          </div>
+          <DialogFooter className="shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              {tc("cancel")}
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

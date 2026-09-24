@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { DeleteEntityButton } from "@/components/actions/DeleteEntityButton";
 import { Link } from "@/i18n/navigation";
 import { LiveSearchInput } from "@/components/search/LiveSearchInput";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ProjectFormDialog } from "@/components/forms/ProjectFormDialog";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -122,27 +123,17 @@ export default async function ProjectsPage({
 
   return (
     <div className="space-y-6 pb-10">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-light">
-            Nexus CRM
-          </p>
-
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-            {tn("projects")}
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            {t("subtitle")}
-          </p>
-        </div>
-
-        <ProjectFormDialog
-          contacts={contactOptions}
-          deals={dealOptions}
-          autoOpen={params.action === "new"}
-        />
-      </div>
+      <PageHeader
+        title={tn("projects")}
+        subtitle={t("subtitle")}
+        action={
+          <ProjectFormDialog
+            contacts={contactOptions}
+            deals={dealOptions}
+            autoOpen={params.action === "new"}
+          />
+        }
+      />
 
       <LiveSearchInput
         key={q}
@@ -201,7 +192,7 @@ export default async function ProjectsPage({
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100">
+                    <div className="flex items-center gap-1 row-actions">
                       <ProjectFormDialog
                         project={{
                           id: project.id,

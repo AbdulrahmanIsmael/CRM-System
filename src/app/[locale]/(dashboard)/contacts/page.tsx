@@ -11,6 +11,8 @@ import { ContactFormDialog } from "@/components/forms/ContactFormDialog";
 import { DeleteEntityButton } from "@/components/actions/DeleteEntityButton";
 import { Link } from "@/i18n/navigation";
 import { LiveSearchInput } from "@/components/search/LiveSearchInput";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Pagination } from "@/components/layout/Pagination";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
@@ -20,17 +22,23 @@ import { getTranslations } from "next-intl/server";
 export default async function ContactsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ action?: string; q?: string }>;
+  searchParams?: Promise<{ action?: string; q?: string; page?: string }>;
 }) {
   const params = (await searchParams) ?? {};
+  const page = Math.max(1, Number(params.page) || 1);
+  const pageSize = 24;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
   const t = await getTranslations("Contacts"),
     tc = await getTranslations("Common"),
     tn = await getTranslations("Navigation");
+
   const supabase = await createClient();
   let query = supabase
     .from("contacts")
     .select(
       "id,type,status,first_name,last_name,company_name,email,phone,phone_country_code,phone_number,nationality,lead_source,website,location,timezone,notes",
+      { count: "exact" },
     )
     .order("created_at", { ascending: false });
   const q = params.q ? sanitizeSearchTerm(params.q) : "";
@@ -38,23 +46,14 @@ export default async function ContactsPage({
     query = query.or(
       `first_name.ilike.%${q}%,last_name.ilike.%${q}%,company_name.ilike.%${q}%,email.ilike.%${q}%`,
     );
-  const { data: contacts, error } = await query;
+  const { data: contacts, error, count } = await query.range(from, to);
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-light">
-            Nexus CRM
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-            {tn("contacts")}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            {t("subtitle")}
-          </p>
-        </div>
-        <ContactFormDialog autoOpen={params.action === "new"} />
-      </div>
+      <PageHeader
+        title={tn("contacts")}
+        subtitle={t("subtitle")}
+        action={<ContactFormDialog autoOpen={params.action === "new"} />}
+      />
       <div className="flex flex-col gap-3 sm:flex-row">
         <LiveSearchInput
           key={params.q ?? ""}
@@ -115,7 +114,7 @@ export default async function ContactsPage({
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+                    <div className="flex items-center gap-1 row-actions">
                       <ContactFormDialog contact={contact} compact />
                       <DeleteEntityButton entity="contact" id={contact.id} />
                       <Link
@@ -164,17 +163,25 @@ export default async function ContactsPage({
                         </span>
                       </div>
                     )}
-                    {!contact.email && !contact.phone && (
-                      <div className="rounded-xl bg-muted/30 px-3 py-2 text-xs">
-                        {t("noDirectInfo")}
-                      </div>
-                    )}
+                    {!contact.email &&
+                      !formatPhone(
+                        contact.phone_country_code,
+                        contact.phone_number,
+                        contact.phone,
+                      ) && (
+                        <div className="rounded-xl bg-muted/30 px-3 py-2 text-xs">
+                          {t("noDirectInfo")}
+                        </div>
+                      )}
                   </div>
                 </CardContent>
               </Card>
             );
           })}
         </div>
+      )}
+      {!error && (contacts ?? []).length > 0 && (
+        <Pagination page={page} pageSize={pageSize} total={count ?? 0} />
       )}
     </div>
   );

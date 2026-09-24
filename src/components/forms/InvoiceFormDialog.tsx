@@ -71,7 +71,7 @@ export function InvoiceFormDialog({
   const isEdit = Boolean(invoice);
   const t = useTranslations("Invoices");
   const tc = useTranslations("Common");
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(autoOpen);
@@ -309,7 +309,7 @@ export function InvoiceFormDialog({
           )
         }
       />
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col overflow-hidden sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
             {isEdit ? `${tc("edit")} - ${t("invoice")}` : t("createInvoice")}
@@ -318,9 +318,9 @@ export function InvoiceFormDialog({
             {isEdit ? t("editDescription") : t("createDescription")}
           </DialogDescription>
         </DialogHeader>
-        <div className="relative">
-          <LoadingOverlay show={loading} label={tc("saving")} />
-          <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+          <div className="relative min-h-0 flex-1 space-y-4 overflow-y-auto">
+            <LoadingOverlay show={loading} label={tc("saving")} />
             <div className="grid md:grid-cols-3 gap-3">
               <label className="space-y-4 text-sm">
                 <span>
@@ -573,21 +573,20 @@ export function InvoiceFormDialog({
                 placeholder={t("notes")}
               />
             </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
-                {tc("cancel")}
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
-              </Button>
-            </DialogFooter>
-          </form>
-        </div>
+          </div>
+          <DialogFooter className="shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              {tc("cancel")}
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -9,6 +9,7 @@ import {
   ListChecks,
   MessageCircle,
   Search,
+  TriangleAlert,
   UsersRound,
 } from "lucide-react";
 import {
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizeSearchTerm } from "@/lib/crm";
@@ -47,13 +49,16 @@ type Group = {
 };
 export function GlobalSearch() {
   const t = useTranslations("GlobalSearch"),
+    tc = useTranslations("Common"),
     nav = useTranslations("Navigation"),
     supabase = useMemo(() => createClient(), []),
     router = useRouter();
   const [open, setOpen] = useState(false),
     [term, setTerm] = useState(""),
     [loading, setLoading] = useState(false),
-    [groups, setGroups] = useState<Group[]>([]);
+    [groups, setGroups] = useState<Group[]>([]),
+    [retryKey, setRetryKey] = useState(0),
+    [hasError, setHasError] = useState(false);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -70,14 +75,19 @@ export function GlobalSearch() {
       return;
     }
 
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const handle = window.setTimeout(async () => {
       const q = sanitizeSearchTerm(term);
 
       if (!q) {
+        setLoading(false);
         return;
       }
 
       setLoading(true);
+      setHasError(false);
 
       const like = `%${q}%`;
       const [
@@ -95,38 +105,46 @@ export function GlobalSearch() {
           .or(
             `first_name.ilike.${like},last_name.ilike.${like},company_name.ilike.${like},email.ilike.${like}`,
           )
-          .limit(6),
+          .limit(6)
+          .abortSignal(signal),
         supabase
           .from("deals")
           .select("id,title,value,currency,notes")
           .or(`title.ilike.${like},notes.ilike.${like}`)
-          .limit(6),
+          .limit(6)
+          .abortSignal(signal),
         supabase
           .from("projects")
           .select("id,name,description,budget")
           .or(`name.ilike.${like},description.ilike.${like}`)
-          .limit(6),
+          .limit(6)
+          .abortSignal(signal),
         supabase
           .from("invoices")
           .select("id,invoice_number,total,currency,notes")
           .or(`invoice_number.ilike.${like},notes.ilike.${like}`)
-          .limit(6),
+          .limit(6)
+          .abortSignal(signal),
         supabase
           .from("tasks")
           .select("id,title,description,status")
           .or(`title.ilike.${like},description.ilike.${like}`)
-          .limit(6),
+          .limit(6)
+          .abortSignal(signal),
         supabase
           .from("events")
           .select("id,title,description,start_time")
           .or(`title.ilike.${like},description.ilike.${like}`)
-          .limit(6),
+          .limit(6)
+          .abortSignal(signal),
         supabase
           .from("communication_log")
           .select("id,subject,content,date,contact_id")
           .or(`subject.ilike.${like},content.ilike.${like}`)
-          .limit(6),
+          .limit(6)
+          .abortSignal(signal),
       ]);
+      if (signal.aborted) return;
       const next: Group[] = [];
       if (contacts.data?.length)
         next.push({
@@ -208,11 +226,24 @@ export function GlobalSearch() {
             href: x.contact_id ? `/contacts/${x.contact_id}` : "/contacts",
           })),
         });
+      const anyFailed = [
+        contacts,
+        deals,
+        projects,
+        invoices,
+        tasks,
+        events,
+        communications,
+      ].some((result) => result.error);
+      setHasError(next.length === 0 && anyFailed);
       setGroups(next);
       setLoading(false);
     }, 220);
-    return () => window.clearTimeout(handle);
-  }, [open, term, supabase, t]);
+    return () => {
+      window.clearTimeout(handle);
+      controller.abort();
+    };
+  }, [open, term, supabase, t, retryKey]);
   const hasValidSearch = open && Boolean(sanitizeSearchTerm(term));
 
   const visibleGroups = hasValidSearch ? groups : [];
@@ -243,6 +274,7 @@ export function GlobalSearch() {
             setTerm("");
             setGroups([]);
             setLoading(false);
+            setHasError(false);
           }
         }}
       >
@@ -255,7 +287,10 @@ export function GlobalSearch() {
               <Input
                 autoFocus
                 value={term}
-                onChange={(e) => setTerm(e.target.value)}
+                onChange={(e) => {
+                  setTerm(e.target.value);
+                  setHasError(false);
+                }}
                 placeholder={t("placeholder")}
                 className="h-14 rounded-2xl bg-background pe-4 ps-11 text-[15px] shadow-lg"
               />
@@ -274,6 +309,26 @@ export function GlobalSearch() {
             ) : loading ? (
               <div className="flex min-h-60 items-center justify-center text-sm text-muted-foreground">
                 {t("searching")}
+              </div>
+            ) : hasError ? (
+              <div
+                role="alert"
+                className="flex min-h-60 flex-col items-center justify-center gap-3 text-center"
+              >
+                <div className="flex size-14 items-center justify-center rounded-2xl bg-danger/10 text-danger">
+                  <TriangleAlert className="size-6" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {t("searchError")}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setRetryKey((k) => k + 1)}
+                >
+                  {tc("retry")}
+                </Button>
               </div>
             ) : total === 0 ? (
               <div className="flex min-h-60 items-center justify-center text-sm text-muted-foreground">

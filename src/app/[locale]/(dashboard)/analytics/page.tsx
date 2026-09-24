@@ -1,4 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { createClient } from "@/lib/supabase/server";
 import { AnalyticsCharts } from "@/components/analytics/AnalyticsCharts";
 
@@ -78,10 +79,7 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">{t("title")}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{t("subtitle")}</p>
-      </div>
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
       <AnalyticsCharts
         locale={locale}
         revenue={months.map(({ name, revenue }) => ({ name, revenue }))}

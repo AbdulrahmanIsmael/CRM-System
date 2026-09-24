@@ -58,7 +58,7 @@ export function Sidebar({ className }: { className?: string }) {
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto px-3 py-4">
-        <nav className="space-y-1" aria-label={t("dashboard")}>
+        <nav className="space-y-1" aria-label={t("mainNavigation")}>
           {navItems.map(({ href, key, icon: Icon }) => {
             const active =
               pathname === href ||

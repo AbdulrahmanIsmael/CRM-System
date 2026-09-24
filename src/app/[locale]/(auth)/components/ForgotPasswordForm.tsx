@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
@@ -8,7 +8,10 @@ import { Mail, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AuthInput } from "./AuthInput";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/types/auth";
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordFormData,
+} from "@/types/auth";
 import { createClient } from "@/lib/supabase/client";
 
 export type AuthFormType = "signin" | "signup" | "forgot-password";
@@ -21,7 +24,7 @@ export function ForgotPasswordForm({ onToggleForm }: ForgotPasswordFormProps) {
   const t = useTranslations("Auth");
   const tc = useTranslations("Common");
   const [isLoading, setIsLoading] = useState(false);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const {
     register,
@@ -45,6 +48,7 @@ export function ForgotPasswordForm({ onToggleForm }: ForgotPasswordFormProps) {
 
       toast.success(t("forgotPasswordSuccess"));
     } catch (err) {
+      console.log(err);
       toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);

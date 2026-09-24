@@ -10,13 +10,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 export function DeleteReportButton({ reportId }: { reportId: string }) {
@@ -25,7 +25,7 @@ export function DeleteReportButton({ reportId }: { reportId: string }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   async function remove() {
     setLoading(true);

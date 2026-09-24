@@ -5,6 +5,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 
 import { DeleteReportButton } from "@/components/reports/DeleteReportButton";
 import { Link } from "@/i18n/navigation";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ReportCreateDialog } from "@/components/reports/ReportCreateDialog";
 import { buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -58,23 +59,16 @@ export default async function ReportsPage({
     });
   return (
     <div className="space-y-6 pb-10">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-light">
-            {tn("reports")}
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            {t("subtitle")}
-          </p>
-        </div>
-        <ReportCreateDialog
-          projects={projectOptions}
-          preselectedProjectId={params.project}
-        />
-      </div>
+      <PageHeader
+        title={tn("reports")}
+        subtitle={t("subtitle")}
+        action={
+          <ReportCreateDialog
+            projects={projectOptions}
+            preselectedProjectId={params.project}
+          />
+        }
+      />
       {(reports ?? []).length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex min-h-72 flex-col items-center justify-center text-center">
@@ -113,8 +107,7 @@ export default async function ReportsPage({
                         className={buttonVariants({
                           variant: "ghost",
                           size: "icon-sm",
-                          className:
-                            "opacity-100 md:opacity-0 md:group-hover:opacity-100",
+                          className: "row-actions",
                         })}
                         aria-label={tc("edit")}
                         title={tc("edit")}
