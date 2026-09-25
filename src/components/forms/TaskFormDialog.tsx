@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, LoaderCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,13 +23,14 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { DateInput } from "@/components/ui/date-input";
 import { Input } from "@/components/ui/input";
-import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { RichTextEditor } from "@/components/reports/RichTextEditor";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 type Option = { id: string; label: string };
+type DealOption = Option & { contactId?: string | null };
+type ProjectOption = Option & { contactId?: string | null; dealId?: string | null };
 type Task = {
   id: string;
   title: string;
@@ -56,8 +57,8 @@ export function TaskFormDialog({
 }: {
   task?: Task;
   contacts: Option[];
-  deals: Option[];
-  projects: Option[];
+  deals: DealOption[];
+  projects: ProjectOption[];
   autoOpen?: boolean;
   compact?: boolean;
 }) {
@@ -82,6 +83,29 @@ export function TaskFormDialog({
 
   const update = (k: keyof typeof form, v: string) =>
     setForm((x) => ({ ...x, [k]: v }));
+
+  // Filtered deals: only those belonging to the selected contact
+  const filteredDeals = useMemo(
+    () =>
+      form.contactId
+        ? deals.filter((d) => d.contactId === form.contactId)
+        : deals,
+    [deals, form.contactId],
+  );
+
+  // Filtered projects: those belonging to the selected deal, OR
+  // contact-only projects (no deal) for the selected contact
+  const filteredProjects = useMemo(() => {
+    if (form.dealId) {
+      return projects.filter((p) => p.dealId === form.dealId);
+    }
+    if (form.contactId) {
+      return projects.filter(
+        (p) => p.contactId === form.contactId && !p.dealId,
+      );
+    }
+    return projects;
+  }, [projects, form.contactId, form.dealId]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -206,7 +230,6 @@ export function TaskFormDialog({
         </DialogHeader>
         <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
           <div className="relative min-h-0 flex-1 space-y-5 overflow-y-auto">
-            <LoadingOverlay show={loading} label={tc("saving")} />
             <label className="space-y-4 text-sm block">
               <span>{t("taskTitle")}</span>
               <Input
@@ -287,39 +310,91 @@ export function TaskFormDialog({
               </label>
             </div>
             <div className="grid md:grid-cols-3 gap-4">
-              {(
-                [
-                  ["contact", "contactId", contacts],
-                  ["deal", "dealId", deals],
-                  ["project", "projectId", projects],
-                ] as const
-              ).map(([labelKey, field, options]) => (
-                <label key={field} className="space-y-4 text-sm">
-                  <span>{t(labelKey)}</span>
-                  <Select
-                    value={form[field] || "none"}
-                    items={[
-                      { value: "none", label: tc("none") },
-                      ...options.map((x) => ({ value: x.id, label: x.label })),
-                    ]}
-                    onValueChange={(v) =>
-                      update(field, v === "none" ? "" : String(v))
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">{tc("none")}</SelectItem>
-                      {options.map((x) => (
-                        <SelectItem key={x.id} value={x.id}>
-                          {x.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </label>
-              ))}
+              {/* Contact */}
+              <label className="space-y-4 text-sm">
+                <span>{t("contact")}</span>
+                <Select
+                  value={form.contactId || "none"}
+                  items={[
+                    { value: "none", label: tc("none") },
+                    ...contacts.map((x) => ({ value: x.id, label: x.label })),
+                  ]}
+                  onValueChange={(v) => {
+                    const next = v === "none" ? "" : String(v);
+                    setForm((x) => ({
+                      ...x,
+                      contactId: next,
+                      dealId: "",
+                      projectId: "",
+                    }));
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{tc("none")}</SelectItem>
+                    {contacts.map((x) => (
+                      <SelectItem key={x.id} value={x.id}>
+                        {x.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
+              {/* Deal (filtered by contact) */}
+              <label className="space-y-4 text-sm">
+                <span>{t("deal")}</span>
+                <Select
+                  value={form.dealId || "none"}
+                  items={[
+                    { value: "none", label: tc("none") },
+                    ...filteredDeals.map((x) => ({ value: x.id, label: x.label })),
+                  ]}
+                  onValueChange={(v) => {
+                    const next = v === "none" ? "" : String(v);
+                    setForm((x) => ({ ...x, dealId: next, projectId: "" }));
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{tc("none")}</SelectItem>
+                    {filteredDeals.map((x) => (
+                      <SelectItem key={x.id} value={x.id}>
+                        {x.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
+              {/* Project (filtered by deal or contact) */}
+              <label className="space-y-4 text-sm">
+                <span>{t("project")}</span>
+                <Select
+                  value={form.projectId || "none"}
+                  items={[
+                    { value: "none", label: tc("none") },
+                    ...filteredProjects.map((x) => ({ value: x.id, label: x.label })),
+                  ]}
+                  onValueChange={(v) =>
+                    update("projectId", v === "none" ? "" : String(v))
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{tc("none")}</SelectItem>
+                    {filteredProjects.map((x) => (
+                      <SelectItem key={x.id} value={x.id}>
+                        {x.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
             </div>
           </div>
           <DialogFooter className="shrink-0">
@@ -331,6 +406,7 @@ export function TaskFormDialog({
               {tc("cancel")}
             </Button>
             <Button type="submit" disabled={loading}>
+              {loading && <LoaderCircle className="animate-spin" data-icon="inline-start" />}
               {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
             </Button>
           </DialogFooter>

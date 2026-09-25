@@ -52,7 +52,7 @@ export default async function CalendarPage({
       .from("contacts")
       .select("id,type,first_name,last_name,company_name")
       .eq("status", "active"),
-    supabase.from("projects").select("id,name"),
+    supabase.from("projects").select("id,name,contact_id,deal_id"),
   ]);
   const contactOptions = (contacts ?? [])
     .map((c) => ({ id: c.id, label: getContactDisplayName(c) }))
@@ -60,8 +60,10 @@ export default async function CalendarPage({
   const projectOptions = (projects ?? []).map((p) => ({
     id: p.id,
     label: p.name,
+    contactId: p.contact_id,
+    dealId: p.deal_id,
   }));
-  const dealOptions = (deals ?? []).map((d) => ({ id: d.id, label: d.title }));
+  const dealOptions = (deals ?? []).map((d) => ({ id: d.id, label: d.title, contactId: d.contact_id }));
   const contactById = new Map(
     (contacts ?? []).map((c) => [c.id, getContactDisplayName(c)]),
   );

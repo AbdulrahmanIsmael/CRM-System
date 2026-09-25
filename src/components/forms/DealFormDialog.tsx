@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Pencil, Plus } from "lucide-react";
+import { LoaderCircle, Pencil, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,7 +23,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { DateInput } from "@/components/ui/date-input";
 import { Input } from "@/components/ui/input";
-import { LoadingOverlay } from "@/components/ui/loading-overlay";
+
 import { RichTextEditor } from "@/components/reports/RichTextEditor";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -193,117 +193,121 @@ export function DealFormDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="relative flex min-h-0 flex-1">
-          <LoadingOverlay show={loading} label={tc("saving")} />
           <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
             <div className="min-h-0 flex-1 space-y-5 overflow-y-auto">
-            <label className="space-y-4 text-sm block">
-              <span>{t("titleLabel")}</span>
-              <Input
-                value={form.title}
-                onChange={(e) => update("title", e.target.value)}
-              />
-            </label>
-            <div className="grid md:grid-cols-2 gap-4">
-              <label className="space-y-4 text-sm">
-                <span>{t("contact")}</span>
-                <Select
-                  value={form.contactId}
-                  items={contacts.map((x) => ({ value: x.id, label: x.label }))}
-                  onValueChange={(v) => update("contactId", String(v))}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {contacts.map((x) => (
-                      <SelectItem key={x.id} value={x.id}>
-                        {x.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </label>
-              <label className="space-y-4 text-sm">
-                <span>{t("stage")}</span>
-                <Select
-                  value={form.stageId}
-                  items={stages.map((x) => ({ value: x.id, label: x.label }))}
-                  onValueChange={(v) => update("stageId", String(v))}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {stages.map((x) => (
-                      <SelectItem key={x.id} value={x.id}>
-                        {x.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </label>
-              <label className="space-y-4 text-sm">
-                <span>{t("value")}</span>
+              <label className="space-y-4 text-sm block">
+                <span>{t("titleLabel")}</span>
                 <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={form.value}
-                  onChange={(e) => update("value", e.target.value)}
+                  value={form.title}
+                  onChange={(e) => update("title", e.target.value)}
                 />
               </label>
-              <label className="space-y-4 text-sm">
-                <span>{t("currency")}</span>
-                <Input
-                  maxLength={3}
-                  value={form.currency}
-                  onChange={(e) => update("currency", e.target.value)}
+              <div className="grid md:grid-cols-2 gap-4">
+                <label className="space-y-4 text-sm">
+                  <span>{t("contact")}</span>
+                  <Select
+                    value={form.contactId}
+                    items={contacts.map((x) => ({
+                      value: x.id,
+                      label: x.label,
+                    }))}
+                    onValueChange={(v) => update("contactId", String(v))}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {contacts.map((x) => (
+                        <SelectItem key={x.id} value={x.id}>
+                          {x.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </label>
+                <label className="space-y-4 text-sm">
+                  <span>{t("stage")}</span>
+                  <Select
+                    value={form.stageId}
+                    items={stages.map((x) => ({ value: x.id, label: x.label }))}
+                    onValueChange={(v) => update("stageId", String(v))}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {stages.map((x) => (
+                        <SelectItem key={x.id} value={x.id}>
+                          {x.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </label>
+                <label className="space-y-4 text-sm">
+                  <span>{t("value")}</span>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.value}
+                    onChange={(e) => update("value", e.target.value)}
+                  />
+                </label>
+                <label className="space-y-4 text-sm">
+                  <span>{t("currency")}</span>
+                  <Input
+                    maxLength={3}
+                    value={form.currency}
+                    onChange={(e) => update("currency", e.target.value)}
+                  />
+                </label>
+                <label className="space-y-4 text-sm">
+                  <span>{t("priority")}</span>
+                  <Select
+                    value={form.priority}
+                    items={["low", "medium", "high", "urgent"].map((value) => ({
+                      value,
+                      label: t(`priorities.${value}`),
+                    }))}
+                    onValueChange={(v) => update("priority", String(v))}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["low", "medium", "high", "urgent"].map((v) => (
+                        <SelectItem key={v} value={v}>
+                          {t(`priorities.${v}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </label>
+                <label className="space-y-4 text-sm">
+                  <span>{t("expectedCloseDate")}</span>
+                  <DateInput
+                    type="date"
+                    value={form.expectedCloseDate}
+                    onChange={(e) =>
+                      update("expectedCloseDate", e.target.value)
+                    }
+                  />
+                </label>
+              </div>
+              <div className="space-y-4 text-sm block">
+                <span>
+                  {t("notes")}{" "}
+                  <em className="text-xs text-muted-foreground">
+                    ({tc("optional")})
+                  </em>
+                </span>
+                <RichTextEditor
+                  value={form.notes}
+                  onChange={(value) => update("notes", value)}
+                  placeholder={t("notes")}
                 />
-              </label>
-              <label className="space-y-4 text-sm">
-                <span>{t("priority")}</span>
-                <Select
-                  value={form.priority}
-                  items={["low", "medium", "high", "urgent"].map((value) => ({
-                    value,
-                    label: t(`priorities.${value}`),
-                  }))}
-                  onValueChange={(v) => update("priority", String(v))}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {["low", "medium", "high", "urgent"].map((v) => (
-                      <SelectItem key={v} value={v}>
-                        {t(`priorities.${v}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </label>
-              <label className="space-y-4 text-sm">
-                <span>{t("expectedCloseDate")}</span>
-                <DateInput
-                  type="date"
-                  value={form.expectedCloseDate}
-                  onChange={(e) => update("expectedCloseDate", e.target.value)}
-                />
-              </label>
-            </div>
-            <div className="space-y-4 text-sm block">
-              <span>
-                {t("notes")}{" "}
-                <em className="text-xs text-muted-foreground">
-                  ({tc("optional")})
-                </em>
-              </span>
-              <RichTextEditor
-                value={form.notes}
-                onChange={(value) => update("notes", value)}
-                placeholder={t("notes")}
-              />
-            </div>
+              </div>
             </div>
             <DialogFooter className="shrink-0">
               <Button
@@ -314,6 +318,12 @@ export function DealFormDialog({
                 {tc("cancel")}
               </Button>
               <Button type="submit" disabled={loading}>
+                {loading && (
+                  <LoaderCircle
+                    className="animate-spin"
+                    data-icon="inline-start"
+                  />
+                )}
                 {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
               </Button>
             </DialogFooter>

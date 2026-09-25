@@ -1,11 +1,10 @@
 "use client";
 
-import { CheckCircle2, Send } from "lucide-react";
+import { CheckCircle2, LoaderCircle, Send } from "lucide-react";
 import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { Button } from "@/components/ui/button";
-import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -56,33 +55,38 @@ export function InvoiceStatusActions({
     }
   }
   return (
-    <div className="relative">
-      <LoadingOverlay show={loading} label={t("saving")} />
-      <div className="flex flex-wrap gap-2">
-        {(status === "draft" || status === "overdue") && (
-          <Button
-            type="button"
-            variant="outline"
-            size={compact ? "sm" : "default"}
-            disabled={loading}
-            onClick={() => updateStatus("sent")}
-          >
+    <div className="flex flex-wrap gap-2">
+      {(status === "draft" || status === "overdue") && (
+        <Button
+          type="button"
+          variant="outline"
+          size={compact ? "sm" : "default"}
+          disabled={loading}
+          onClick={() => updateStatus("sent")}
+        >
+          {loading ? (
+            <LoaderCircle className="animate-spin" data-icon="inline-start" />
+          ) : (
             <Send data-icon="inline-start" />
-            {t("markSent")}
-          </Button>
-        )}
-        {status === "sent" || status === "overdue" ? (
-          <Button
-            type="button"
-            size={compact ? "sm" : "default"}
-            disabled={loading}
-            onClick={() => updateStatus("paid")}
-          >
+          )}
+          {t("markSent")}
+        </Button>
+      )}
+      {status === "sent" || status === "overdue" ? (
+        <Button
+          type="button"
+          size={compact ? "sm" : "default"}
+          disabled={loading}
+          onClick={() => updateStatus("paid")}
+        >
+          {loading ? (
+            <LoaderCircle className="animate-spin" data-icon="inline-start" />
+          ) : (
             <CheckCircle2 data-icon="inline-start" />
-            {t("markPaid")}
-          </Button>
-        ) : null}
-      </div>
+          )}
+          {t("markPaid")}
+        </Button>
+      ) : null}
     </div>
   );
 }

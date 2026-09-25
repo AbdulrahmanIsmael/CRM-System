@@ -58,21 +58,23 @@ export default async function TasksPage({
       .eq("status", "active"),
     supabase
       .from("deals")
-      .select("id,title")
+      .select("id,title,contact_id")
       .order("created_at", { ascending: false }),
     supabase
       .from("projects")
-      .select("id,name")
+      .select("id,name,contact_id,deal_id")
       .order("created_at", { ascending: false }),
   ]);
 
   const contactOptions = (contacts ?? [])
     .map((c) => ({ id: c.id, label: getContactDisplayName(c) }))
     .filter((x) => x.label);
-  const dealOptions = (deals ?? []).map((d) => ({ id: d.id, label: d.title }));
+  const dealOptions = (deals ?? []).map((d) => ({ id: d.id, label: d.title, contactId: d.contact_id }));
   const projectOptions = (projects ?? []).map((p) => ({
     id: p.id,
     label: p.name,
+    contactId: p.contact_id,
+    dealId: p.deal_id,
   }));
 
   return (

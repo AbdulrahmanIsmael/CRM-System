@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, LoaderCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,7 +23,6 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { DateInput } from "@/components/ui/date-input";
 import { Input } from "@/components/ui/input";
-import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { RichTextEditor } from "@/components/reports/RichTextEditor";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -198,7 +197,6 @@ export function ProjectFormDialog({
         </DialogHeader>
         <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
           <div className="relative min-h-0 flex-1 space-y-5 overflow-y-auto">
-            <LoadingOverlay show={loading} label={tc("saving")} />
             <label className="space-y-4 text-sm block">
               <span>{t("name")}</span>
               <Input
@@ -349,6 +347,7 @@ export function ProjectFormDialog({
               {tc("cancel")}
             </Button>
             <Button type="submit" disabled={loading}>
+              {loading && <LoaderCircle className="animate-spin" data-icon="inline-start" />}
               {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
             </Button>
           </DialogFooter>

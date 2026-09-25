@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Pencil, Plus } from "lucide-react";
+import { LoaderCircle, Pencil, Plus } from "lucide-react";
 import { PhoneField, splitLegacyPhone } from "@/components/contacts/PhoneField";
 import {
   Select,
@@ -24,7 +24,6 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { CONTACT_LEAD_SOURCES } from "@/constants";
 import { Input } from "@/components/ui/input";
-import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { RichTextEditor } from "@/components/reports/RichTextEditor";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -238,7 +237,6 @@ export function ContactFormDialog({
         </DialogHeader>
         <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
           <div className="relative min-h-0 flex-1 space-y-5 overflow-y-auto">
-            <LoadingOverlay show={loading} label={tc("saving")} />
             <label className="block space-y-2.5 text-sm">
               <span>{t("type")}</span>
               <Select
@@ -419,6 +417,12 @@ export function ContactFormDialog({
               {tc("cancel")}
             </Button>
             <Button type="submit" disabled={loading}>
+              {loading && (
+                <LoaderCircle
+                  className="animate-spin"
+                  data-icon="inline-start"
+                />
+              )}
               {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
             </Button>
           </DialogFooter>

@@ -1,6 +1,6 @@
 import {
+  InvoiceListSkeleton,
   PageHeaderSkeleton,
-  RowListSkeleton,
   SearchBarSkeleton,
 } from "@/components/layout/PageSkeletons";
 
@@ -9,7 +9,7 @@ export default function Loading() {
     <div className="space-y-6 pb-10" aria-busy="true">
       <PageHeaderSkeleton />
       <SearchBarSkeleton />
-      <RowListSkeleton />
+      <InvoiceListSkeleton count={8} />
     </div>
   );
 }

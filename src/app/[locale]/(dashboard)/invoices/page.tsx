@@ -59,7 +59,7 @@ export default async function InvoicesPage({
         .eq("status", "active"),
       supabase
         .from("projects")
-        .select("id,name")
+        .select("id,name,contact_id")
         .order("created_at", { ascending: false }),
     ]);
 
@@ -69,6 +69,7 @@ export default async function InvoicesPage({
   const projectOptions = (projects ?? []).map((p) => ({
     id: p.id,
     label: p.name,
+    contactId: p.contact_id,
   }));
 
   return (

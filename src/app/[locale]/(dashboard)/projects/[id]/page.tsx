@@ -23,7 +23,7 @@ export default async function ProjectDetailsPage({
   const { id } = await params;
   const locale = (await getLocale()) as "en" | "ar";
   const t = await getTranslations("Projects");
-  const tCommon = await getTranslations("Common");
+  // const tCommon = await getTranslations("Common");
   const tInvoices = await getTranslations("Invoices");
   const tTasks = await getTranslations("Tasks");
   const supabase = await createClient();
@@ -84,7 +84,11 @@ export default async function ProjectDetailsPage({
   const contactOptions = (contacts ?? [])
     .map((c) => ({ id: c.id, label: getContactDisplayName(c) }))
     .filter((x) => x.label);
-  const dealOptions = (deals ?? []).map((d) => ({ id: d.id, label: d.title, contactId: d.contact_id }));
+  const dealOptions = (deals ?? []).map((d) => ({
+    id: d.id,
+    label: d.title,
+    contactId: d.contact_id,
+  }));
   const linkedDeal = Array.isArray(project.deals)
     ? project.deals[0]
     : project.deals;
@@ -197,9 +201,21 @@ export default async function ProjectDetailsPage({
 
       <Tabs defaultValue="tasks" className="space-y-4">
         <TabsList className="grid h-12 w-full max-w-xl grid-cols-3 gap-1 rounded-xl border border-border/80 bg-surface/80 p-1.5 shadow-sm">
-          <TabsTrigger className="h-full rounded-lg px-4 py-2.5" value="tasks">{t("tasks")}</TabsTrigger>
-          <TabsTrigger className="h-full rounded-lg px-4 py-2.5" value="overview">{t("description")}</TabsTrigger>
-          <TabsTrigger className="h-full rounded-lg px-4 py-2.5" value="invoices">{t("relatedInvoices")}</TabsTrigger>
+          <TabsTrigger className="h-full rounded-lg px-4 py-2.5" value="tasks">
+            {t("tasks")}
+          </TabsTrigger>
+          <TabsTrigger
+            className="h-full rounded-lg px-4 py-2.5"
+            value="overview"
+          >
+            {t("description")}
+          </TabsTrigger>
+          <TabsTrigger
+            className="h-full rounded-lg px-4 py-2.5"
+            value="invoices"
+          >
+            {t("relatedInvoices")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="tasks">
@@ -262,7 +278,11 @@ export default async function ProjectDetailsPage({
         <TabsContent value="overview">
           <Card>
             <CardContent className="pt-6">
-              {project.description ? <RichTextContent value={project.description} /> : <p>-</p>}
+              {project.description ? (
+                <RichTextContent value={project.description} />
+              ) : (
+                <p>-</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -276,7 +296,13 @@ export default async function ProjectDetailsPage({
                   { id: project.contact_id, label: contact },
                   ...contactOptions.filter((x) => x.id !== project.contact_id),
                 ]}
-                projects={[{ id: project.id, label: project.name }]}
+                projects={[
+                  {
+                    id: project.id,
+                    label: project.name,
+                    contactId: project.contact_id,
+                  },
+                ]}
               />
             </CardHeader>
             <CardContent>

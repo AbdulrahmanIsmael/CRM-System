@@ -48,7 +48,7 @@ export default async function InvoiceDetailsPage({
       .eq("status", "active"),
     supabase
       .from("projects")
-      .select("id,name")
+      .select("id,name,contact_id")
       .order("created_at", { ascending: false }),
   ]);
   if (!invoice) notFound();
@@ -127,6 +127,7 @@ export default async function InvoiceDetailsPage({
             projects={(projects ?? []).map((p) => ({
               id: p.id,
               label: p.name,
+              contactId: p.contact_id,
             }))}
           />
           <DeleteEntityButton entity="invoice" id={invoice.id} />

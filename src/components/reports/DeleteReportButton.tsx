@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Trash2 } from "lucide-react";
+import { AlertTriangle, Trash2, LoaderCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,6 @@ import {
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
@@ -84,7 +83,6 @@ export function DeleteReportButton({ reportId }: { reportId: string }) {
         }
       />
       <DialogContent className="h-fit max-h-[calc(100dvh-2rem)] w-[calc(100%-1.5rem)] overflow-y-auto sm:max-w-md">
-        <LoadingOverlay show={loading} label={t("deleting")} />
         <DialogHeader>
           <div className="mb-1 flex size-11 items-center justify-center rounded-2xl bg-danger/10 text-danger">
             <AlertTriangle className="size-5" />
@@ -101,6 +99,7 @@ export function DeleteReportButton({ reportId }: { reportId: string }) {
             {tc("cancel")}
           </Button>
           <Button variant="destructive" onClick={remove} disabled={loading}>
+            {loading && <LoaderCircle className="animate-spin" data-icon="inline-start" />}
             {loading ? t("deleting") : tc("delete")}
           </Button>
         </DialogFooter>

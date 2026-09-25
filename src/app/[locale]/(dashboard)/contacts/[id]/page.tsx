@@ -343,6 +343,7 @@ export default async function ContactDetailsPage({
                 projects={(projects ?? []).map((project) => ({
                   id: project.id,
                   label: project.name,
+                  contactId: contact.id,
                 }))}
               />
             </CardHeader>

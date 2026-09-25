@@ -24,11 +24,11 @@ const navItems = [
   { href: "/contacts", key: "contacts", icon: UsersRound },
   { href: "/deals", key: "deals", icon: BriefcaseBusiness },
   { href: "/projects", key: "projects", icon: FolderKanban },
-  { href: "/invoices", key: "invoices", icon: FileText },
   { href: "/tasks", key: "tasks", icon: ListChecks },
+  { href: "/invoices", key: "invoices", icon: FileText },
+  { href: "/reports", key: "reports", icon: FileCheck2 },
   { href: "/calendar", key: "calendar", icon: CalendarDays },
   { href: "/analytics", key: "analytics", icon: BarChart3 },
-  { href: "/reports", key: "reports", icon: FileCheck2 },
 ] as const;
 
 export function Sidebar({ className }: { className?: string }) {

@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { LoaderCircle, Pencil, Plus, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,13 +23,13 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { DateInput } from "@/components/ui/date-input";
 import { Input } from "@/components/ui/input";
-import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { RichTextEditor } from "@/components/reports/RichTextEditor";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 type Option = { id: string; label: string };
+type ProjectOption = Option & { contactId?: string | null };
 type Item = { id: string; description: string; amount: number | string };
 export type InvoiceFormData = {
   id: string;
@@ -64,7 +64,7 @@ export function InvoiceFormDialog({
   invoice?: InvoiceFormData;
   items?: Item[];
   contacts: Option[];
-  projects: Option[];
+  projects: ProjectOption[];
   autoOpen?: boolean;
   compact?: boolean;
 }) {
@@ -113,6 +113,15 @@ export function InvoiceFormDialog({
 
   const update = (key: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [key]: value }));
+
+  // Only show projects belonging to the currently selected contact
+  const filteredProjects = useMemo(
+    () =>
+      form.contactId
+        ? projects.filter((p) => p.contactId === form.contactId)
+        : projects,
+    [projects, form.contactId],
+  );
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -320,7 +329,6 @@ export function InvoiceFormDialog({
         </DialogHeader>
         <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
           <div className="relative min-h-0 flex-1 space-y-4 overflow-y-auto">
-            <LoadingOverlay show={loading} label={tc("saving")} />
             <div className="grid md:grid-cols-3 gap-3">
               <label className="space-y-4 text-sm">
                 <span>
@@ -340,7 +348,15 @@ export function InvoiceFormDialog({
                 <Select
                   value={form.contactId}
                   items={contacts.map((x) => ({ value: x.id, label: x.label }))}
-                  onValueChange={(v) => update("contactId", String(v))}
+                  onValueChange={(v) => {
+                    const next = String(v);
+                    // Reset project when contact changes
+                    setForm((current) => ({
+                      ...current,
+                      contactId: next,
+                      projectId: "",
+                    }));
+                  }}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue />
@@ -365,7 +381,10 @@ export function InvoiceFormDialog({
                   value={form.projectId || "none"}
                   items={[
                     { value: "none", label: tc("none") },
-                    ...projects.map((x) => ({ value: x.id, label: x.label })),
+                    ...filteredProjects.map((x) => ({
+                      value: x.id,
+                      label: x.label,
+                    })),
                   ]}
                   onValueChange={(v) =>
                     update("projectId", v === "none" ? "" : String(v))
@@ -376,7 +395,7 @@ export function InvoiceFormDialog({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">{tc("none")}</SelectItem>
-                    {projects.map((x) => (
+                    {filteredProjects.map((x) => (
                       <SelectItem key={x.id} value={x.id}>
                         {x.label}
                       </SelectItem>
@@ -583,6 +602,12 @@ export function InvoiceFormDialog({
               {tc("cancel")}
             </Button>
             <Button type="submit" disabled={loading}>
+              {loading && (
+                <LoaderCircle
+                  className="animate-spin"
+                  data-icon="inline-start"
+                />
+              )}
               {loading ? tc("saving") : isEdit ? tc("save") : tc("create")}
             </Button>
           </DialogFooter>
