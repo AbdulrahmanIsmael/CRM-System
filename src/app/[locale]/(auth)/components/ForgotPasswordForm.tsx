@@ -56,7 +56,7 @@ export function ForgotPasswordForm({ onToggleForm }: ForgotPasswordFormProps) {
   };
 
   return (
-    <div className="relative w-full max-w-md p-8 bg-surface rounded-2xl shadow-xl border border-border">
+    <div className="relative w-full max-w-lg p-8 bg-surface rounded-2xl shadow-xl border border-border">
       <LoadingOverlay show={isLoading} label={tc("loading")} />
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-bold text-text-primary mb-2">

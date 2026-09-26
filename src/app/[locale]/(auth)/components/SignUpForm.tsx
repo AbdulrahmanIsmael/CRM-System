@@ -61,7 +61,7 @@ export function SignUpForm({ onToggleForm }: SignUpFormProps) {
   };
 
   return (
-    <div className="relative w-full max-w-md p-6 md:p-8 bg-surface rounded-2xl shadow-xl border border-border">
+    <div className="relative w-full max-w-lg p-6 md:p-8 bg-surface rounded-2xl shadow-xl border border-border">
       <div className="mb-6 text-center">
         <h2 className="text-2xl font-bold text-text-primary mb-2">
           {t("signUpTitle")}
